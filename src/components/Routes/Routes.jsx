@@ -17,11 +17,11 @@ import RevenueManagement from "../Dashboard/RevenueManagement";
 import Transaction from "../Dashboard/Transaction";
 import Support from "../Dashboard/Support";
 import AddAvatar from "../Dashboard/Settings/AddAvatar";
-import { GrowthRetention } from "../Dashboard/GrowthAndRetention";
 import Reliability from "../Dashboard/Subscription";
 import AdminControls from "../Dashboard/AdminControls";
 import PrivacyCompliance from "../Dashboard/PrivacyCompliance";
 import Settings from "../Dashboard/Settings";
+import Events from "../Dashboard/Events";
 
 const router = createBrowserRouter([
   {
@@ -58,7 +58,7 @@ const router = createBrowserRouter([
           },
           {
             path: "events",
-            element: <GrowthRetention />,
+            element: <Events />,
           },
           {
             path: "artists",
