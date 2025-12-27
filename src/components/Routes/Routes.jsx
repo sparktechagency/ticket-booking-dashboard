@@ -57,33 +57,29 @@ const router = createBrowserRouter([
             element: <Dashboard />,
           },
           {
-            path: "growth-retention",
+            path: "events",
             element: <GrowthRetention />,
           },
           {
-            path: "revenue-management",
+            path: "artists",
             element: <RevenueManagement />,
           },
           {
-            path: "transaction",
+            path: "orders",
             element: <Transaction />,
           },
           {
-            path: "reliabilities",
+            path: "users",
             element: <Reliability />,
           },
 
           {
-            path: "support",
+            path: "transactions",
             element: <Support />,
           },
           {
-            path: "admin-controls",
+            path: "content-management",
             element: <AdminControls />,
-          },
-          {
-            path: "privacy-compliance",
-            element: <PrivacyCompliance />,
           },
           {
             path: "settings",

@@ -1,16 +1,10 @@
 import { useState } from "react";
 
-import { MdOutlineDashboard } from "react-icons/md";
-import { PiUsers } from "react-icons/pi";
-import { AiOutlineTransaction } from "react-icons/ai";
-import { MdDiamond } from "react-icons/md";
-import { MdOutlineMarkEmailUnread } from "react-icons/md";
-import { BsChatHeart } from "react-icons/bs";
+import { MdOutlineDashboard, MdOutlineEventNote } from "react-icons/md";
+import { FiUsers } from "react-icons/fi";
+import { FaTicketAlt, FaMusic, FaDollarSign } from "react-icons/fa";
+import { FaArrowTrendUp } from "react-icons/fa6";
 import { IoSettingsOutline } from "react-icons/io5";
-import { BiDollarCircle } from "react-icons/bi";
-import { GoGraph } from "react-icons/go";
-import { FaShieldHalved } from "react-icons/fa6";
-import { MdOutlineAdminPanelSettings } from "react-icons/md";
 
 import { Link, NavLink } from "react-router-dom";
 
@@ -24,10 +18,10 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="bg-[#ffffff] h-screen w-full shadow-2xl">
+    <div className="bg-[#140f36] h-screen w-full shadow-2xl">
       <div className="flex flex-col items-center gap-4 py-5">
         <Link to="/" className="">
-          <img src={logo} alt="" className="h-12 mx-auto" />
+          <img src={logo} alt="" className="w-20 h-8 mx-auto" />
         </Link>
         <hr className="w-24 border border-[#E0E1E2]" />
       </div>
@@ -35,43 +29,43 @@ export default function Sidebar() {
         {[
           {
             to: "/overview",
-            icon: <MdOutlineDashboard fontSize={24} />,
+            icon: <MdOutlineDashboard fontSize={18} />,
             label: "Overview",
           },
           {
-            to: "/growth-retention",
-            icon: <GoGraph fontSize={24} />,
-            label: "Growth and Retention",
+            to: "/events",
+            icon: <FaTicketAlt fontSize={18} />,
+            label: "Events",
           },
           {
-            to: "/revenue-management",
-            icon: <BiDollarCircle fontSize={24} />,
-            label: "Revenue Management",
+            to: "/artists",
+            icon: <FaMusic fontSize={16} />,
+            label: "Artists",
           },
 
           {
-            to: "/notifications",
-            icon: <AiOutlineTransaction fontSize={24} />,
-            label: "Notifications",
-          },
-          // {
-          //   to: "/reliabilities",
-          //   icon: <MdDiamond fontSize={24} />,
-          //   label: "Reliabilities",
-          // },
-          {
-            to: "/support",
-            icon: <MdOutlineMarkEmailUnread fontSize={24} />,
-            label: "Support",
+            to: "/orders",
+            icon: <FaDollarSign fontSize={18} />,
+            label: "Orders",
           },
           {
-            to: "/admin-controls",
-            icon: <MdOutlineAdminPanelSettings fontSize={24} />,
-            label: "Admin Controls",
+            to: "/users",
+            icon: <FiUsers fontSize={18} />,
+            label: "Users",
+          },
+          {
+            to: "/transactions",
+            icon: <FaArrowTrendUp fontSize={18} />,
+            label: "Transactions",
+          },
+          {
+            to: "/content-management",
+            icon: <MdOutlineEventNote fontSize={18} />,
+            label: "Content (CMS)",
           },
           {
             to: "/settings",
-            icon: <IoSettingsOutline fontSize={24} />,
+            icon: <IoSettingsOutline fontSize={18} />,
             label: "Settings",
           },
 
@@ -86,15 +80,15 @@ export default function Sidebar() {
             to={to}
             onClick={() => handleSelect(to)}
             className={({ isActive }) =>
-              `flex items-center font-medium gap-3 text-base py-2 px-2 rounded-md 
+              `flex items-center font-medium gap-3 text-sm py-2 px-2 rounded-md 
               ${
                 isActive
-                  ? "bg-gradient-to-r from-[#2B7FFF] to-[#00D3F2]  text-[#fff]"
+                  ? "bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] text-white shadow-lg shadow-[#6d1db9]/30"
                   : selected === to
-                  ? "bg-[#2B7FFF] text-black"
-                  : "text-black"
+                  ? "bg-[#bd85f1] text-black"
+                  : "text-[#99a1af] hover:text-white hover:bg-white/5"
               }
-              hover:bg-[#2B7FFF] hover:text-[#fff]`
+              hover:bg-[#bd85f1] hover:text-[#fff]`
             }
           >
             {icon}
