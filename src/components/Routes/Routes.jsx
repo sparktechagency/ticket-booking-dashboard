@@ -13,7 +13,7 @@ import Faq from "../Dashboard/Settings/Faq";
 import TermsAndConditions from "../Dashboard/Settings/TermsAndConditions";
 import AboutUs from "../Dashboard/Settings/AboutUs";
 import PrivacyPolicy from "../Dashboard/Settings/PrivacyPolicy";
-import RevenueManagement from "../Dashboard/RevenueManagement";
+import RevenueManagement from "../Dashboard/Artists";
 import Transaction from "../Dashboard/Transaction";
 import Support from "../Dashboard/Support";
 import AddAvatar from "../Dashboard/Settings/AddAvatar";

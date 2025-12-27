@@ -1,0 +1,66 @@
+export const artistsData = [
+  {
+    id: 1,
+    name: "Luna Rivers",
+    genre: "Pop",
+    bio: "Luna Rivers is a chart-topping pop artist known for her dreamy vocals and high-energy live performances.",
+    popularity: 87,
+    imageUrl: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e",
+    upcomingEvents: [
+      { id: 101, title: "Summer Beats Festival", date: "2025-06-15" },
+      { id: 102, title: "Neon Nights Tour", date: "2025-07-02" },
+    ],
+  },
+  {
+    id: 2,
+    name: "Echo Nova",
+    genre: "Electronic",
+    bio: "Echo Nova blends futuristic synths with deep bass to create immersive electronic soundscapes.",
+    popularity: 74,
+    imageUrl: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91",
+    upcomingEvents: [
+      { id: 103, title: "Midnight Pulse", date: "2025-05-20" },
+    ],
+  },
+  {
+    id: 3,
+    name: "The Rusty Strings",
+    genre: "Indie Rock",
+    bio: "An indie rock band with raw guitar riffs, nostalgic lyrics, and a loyal underground following.",
+    popularity: 69,
+    imageUrl: "https://images.unsplash.com/photo-1511379938547-c1f69419868d",
+    upcomingEvents: [],
+  },
+  {
+    id: 4,
+    name: "Ava Monroe",
+    genre: "R&B / Soul",
+    bio: "Ava Monroe delivers smooth R&B melodies infused with soul, emotion, and timeless style.",
+    popularity: 82,
+    imageUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9",
+    upcomingEvents: [
+      { id: 104, title: "Soul Sessions Live", date: "2025-06-10" },
+    ],
+  },
+  {
+    id: 5,
+    name: "DJ Flux",
+    genre: "House / EDM",
+    bio: "DJ Flux is a global EDM act known for explosive drops and packed festival stages.",
+    popularity: 91,
+    imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
+    upcomingEvents: [
+      { id: 105, title: "Ultra Soundwave", date: "2025-08-01" },
+      { id: 106, title: "Electric Dome", date: "2025-08-18" },
+    ],
+  },
+  {
+    id: 6,
+    name: "Milo Hart",
+    genre: "Acoustic / Folk",
+    bio: "Milo Hart writes intimate folk songs inspired by travel, nature, and human connection.",
+    popularity: 63,
+    imageUrl: "https://images.unsplash.com/photo-1527980965255-d3b416303d12",
+    upcomingEvents: [],
+  },
+];
