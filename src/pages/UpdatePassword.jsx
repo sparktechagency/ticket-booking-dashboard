@@ -44,7 +44,7 @@ const UpdatePassword = () => {
   };
 
   return (
-    <div className="bg-[#a9e9f3] min-h-[100vh]">
+    <div className="bg-[#0a0d27] min-h-[100vh]">
       <Container maxWidth="lg">
         <Grid
           container
@@ -53,8 +53,8 @@ const UpdatePassword = () => {
           alignItems="center"
           style={{ minHeight: "80vh" }}
         >
-          <div className="bg-[#fff] rounded-lg p-5 border border-[#875473] w-1/2">
-            <div className="mb-8">
+          <div className="bg-[#140f36] rounded-lg p-5 border border-[#875473] w-1/2">
+            <div className="mb-8 text-white">
               <div className="flex items-center gap-1 mb-4">
                 <Link to="/verify-otp" style={{ textDecoration: "none" }}>
                   <HiArrowLeft style={{ fontSize: "24px" }} />
@@ -71,9 +71,19 @@ const UpdatePassword = () => {
             >
               {/* New Password Field */}
               <div className="w-full">
-                <InputLabel htmlFor="outlined-adornment-password">
+                <InputLabel
+                  htmlFor="outlined-adornment-password"
+                  sx={{
+                    color: "#cfc3ff",
+                    mb: 0.5,
+                    "&.Mui-focused": {
+                      color: "#e0d7ff",
+                    },
+                  }}
+                >
                   New Password
                 </InputLabel>
+
                 <OutlinedInput
                   id="outlined-adornment-password"
                   type={showNewPassword ? "text" : "password"}
@@ -82,33 +92,42 @@ const UpdatePassword = () => {
                   fullWidth
                   required
                   sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#2B7FFF", // Change border color on focus
-                      },
+                    height: "50px",
+                    color: "#ffffff",
+                    backgroundColor: "rgba(255,255,255,0.04)",
+                    borderRadius: "12px",
+
+                    "& fieldset": {
+                      borderColor: "rgba(255,255,255,0.25)",
                     },
-                    "& .MuiInputLabel-root.Mui-focused": {
-                      color: "#2B7FFF", // Change label color on focus
+
+                    "&:hover fieldset": {
+                      borderColor: "rgba(224,215,255,0.6)",
                     },
-                    height: "50px", // Set the height of the TextField
-                    "& .MuiInputBase-root": {
-                      height: "100%", // Ensure the input base fills the TextField height
+
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#cfc3ff",
+                      borderWidth: "1.5px",
+                    },
+
+                    "& input::placeholder": {
+                      color: "rgba(255,255,255,0.6)",
+                      opacity: 1,
                     },
                   }}
                   endAdornment={
                     <InputAdornment position="end">
                       <IconButton
-                        aria-label={
-                          showNewPassword ? "Hide password" : "Show password"
-                        }
                         onClick={handleShowNewPassword}
                         edge="end"
+                        sx={{
+                          color: "#cfc3ff",
+                          "&:hover": {
+                            backgroundColor: "rgba(207,195,255,0.1)",
+                          },
+                        }}
                       >
-                        {showNewPassword ? (
-                          <IoIosEyeOff className="text-[#2B7FFF]" />
-                        ) : (
-                          <IoMdEye className="text-[#2B7FFF]" />
-                        )}
+                        {showNewPassword ? <IoIosEyeOff /> : <IoMdEye />}
                       </IconButton>
                     </InputAdornment>
                   }
@@ -117,47 +136,63 @@ const UpdatePassword = () => {
 
               {/* Confirm New Password Field */}
               <div className="w-full">
-                <InputLabel htmlFor="outlined-adornment-password">
+                <InputLabel
+                  htmlFor="confirm-password"
+                  sx={{
+                    color: "#cfc3ff",
+                    mb: 0.5,
+                    "&.Mui-focused": {
+                      color: "#e0d7ff",
+                    },
+                  }}
+                >
                   Confirm New Password
                 </InputLabel>
+
                 <OutlinedInput
-                  id="outlined-adornment-password"
+                  id="confirm-password"
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   fullWidth
                   required
                   sx={{
-                    "& .MuiOutlinedInput-root": {
-                      "&.Mui-focused fieldset": {
-                        borderColor: "#2B7FFF",
-                        outlingColor: "#2B7FFF",
-                      },
+                    height: "50px",
+                    color: "#ffffff",
+                    backgroundColor: "rgba(255,255,255,0.04)",
+                    borderRadius: "12px",
+
+                    "& fieldset": {
+                      borderColor: "rgba(255,255,255,0.25)",
                     },
-                    "& .MuiInputLabel-root.Mui-focused": {
-                      color: "#2B7FFF", // Change label color on focus
+
+                    "&:hover fieldset": {
+                      borderColor: "rgba(224,215,255,0.6)",
                     },
-                    height: "50px", // Set the height of the TextField
-                    "& .MuiInputBase-root": {
-                      height: "100%", // Ensure the input base fills the TextField height
+
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#cfc3ff",
+                      borderWidth: "1.5px",
+                    },
+
+                    "& input::placeholder": {
+                      color: "rgba(255,255,255,0.6)",
+                      opacity: 1,
                     },
                   }}
                   endAdornment={
                     <InputAdornment position="end">
                       <IconButton
-                        aria-label={
-                          showConfirmPassword
-                            ? "Hide password"
-                            : "Show password"
-                        }
                         onClick={handleShowConfirmPassword}
                         edge="end"
+                        sx={{
+                          color: "#cfc3ff",
+                          "&:hover": {
+                            backgroundColor: "rgba(207,195,255,0.1)",
+                          },
+                        }}
                       >
-                        {showConfirmPassword ? (
-                          <IoIosEyeOff className="text-[#2B7FFF]" />
-                        ) : (
-                          <IoMdEye className="text-[#2B7FFF]" />
-                        )}
+                        {showConfirmPassword ? <IoIosEyeOff /> : <IoMdEye />}
                       </IconButton>
                     </InputAdornment>
                   }
@@ -175,15 +210,20 @@ const UpdatePassword = () => {
               <div className="w-full">
                 <Button
                   variant="contained"
+                  fullWidth
                   sx={{
-                    backgroundColor: "#2B7FFF",
-                    color: "white",
-                    fontSize: "16px",
+                    px: 3,
+                    py: 1,
+                    background: "linear-gradient(to right, #6d1db9, #bd85f1)",
+                    borderRadius: "12px",
                     textTransform: "none",
-                    padding: "10px",
-                    width: "100%",
-                    borderRadius: "10px",
-                    fontWeight: "bold",
+                    fontSize: "14px",
+                    boxShadow: "0 10px 40px rgba(109, 29, 185, 0.3)",
+                    "&:hover": {
+                      background: "linear-gradient(to right, #5b189b, #a66fd9)",
+                      transform: "scale(1.05)",
+                    },
+                    transition: "all 0.3s",
                   }}
                   type="submit"
                 >
