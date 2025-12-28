@@ -59,11 +59,6 @@ export default function Sidebar() {
             label: "Transactions",
           },
           {
-            to: "/content-management",
-            icon: <MdOutlineEventNote fontSize={18} />,
-            label: "Content (CMS)",
-          },
-          {
             to: "/settings",
             icon: <IoSettingsOutline fontSize={18} />,
             label: "Settings",

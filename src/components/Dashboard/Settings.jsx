@@ -3,46 +3,46 @@ import { Link } from "react-router-dom";
 
 export default function Settings() {
   return (
-    <div className="p-8 h-[93vh]">
+    <div className="space-y-6 h-screen bg-[#0a0d27] p-6 overflow-y-auto">
       <div className="p-8 rounded-lg flex flex-col gap-4">
         <Link
           to="profile"
-          className="flex items-center justify-between bg-gradient-to-r from-[#2B7FFF] to-[#00D3F2]  text-[#fff] p-4 rounded-lg w-3/4 hover:font-medium"
+          className="flex items-center justify-between bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] text-[#fff] p-4 rounded-lg w-3/4 hover:font-medium"
         >
-          <p>Personal Information</p>
+          <p>Admin Profile</p>
           <FaChevronRight />
         </Link>
         <Link
           to="change-password"
-          className="flex items-center justify-between bg-gradient-to-r from-[#2B7FFF] to-[#00D3F2]  text-[#fff] p-4 rounded-lg w-3/4 hover:font-medium"
+          className="flex items-center justify-between bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] text-[#fff] p-4 rounded-lg w-3/4 hover:font-medium"
         >
           <p>Change Password</p>
           <FaChevronRight />
         </Link>
         <Link
           to="terms-and-condition"
-          className="flex items-center justify-between bg-gradient-to-r from-[#2B7FFF] to-[#00D3F2]  text-[#fff] p-4 rounded-lg w-3/4 hover:font-medium"
+          className="flex items-center justify-between bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] text-[#fff] p-4 rounded-lg w-3/4 hover:font-medium"
         >
           <p>Terms & Condition</p>
           <FaChevronRight />
         </Link>
         <Link
           to="about-us"
-          className="flex items-center justify-between bg-gradient-to-r from-[#2B7FFF] to-[#00D3F2]  text-[#fff]  p-4 rounded-lg w-3/4 hover:font-medium"
+          className="flex items-center justify-between bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] text-[#fff]  p-4 rounded-lg w-3/4 hover:font-medium"
         >
           <p>About Us</p>
           <FaChevronRight />
         </Link>
         <Link
           to="privacy-policy"
-          className="flex items-center justify-between bg-gradient-to-r from-[#2B7FFF] to-[#00D3F2]  text-[#fff] p-4 rounded-lg w-3/4 hover:font-medium"
+          className="flex items-center justify-between bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] text-[#fff] p-4 rounded-lg w-3/4 hover:font-medium"
         >
           <p>Privacy Policy</p>
           <FaChevronRight />
         </Link>
         {/* <Link
           to="faq"
-          className="flex items-center justify-between bg-gradient-to-r from-[#2B7FFF] to-[#00D3F2]  text-[#fff] p-4 rounded-lg w-3/4 hover:font-medium"
+          className="flex items-center justify-between bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] text-[#fff] p-4 rounded-lg w-3/4 hover:font-medium"
         >
           <p>FAQ</p>
           <FaChevronRight />

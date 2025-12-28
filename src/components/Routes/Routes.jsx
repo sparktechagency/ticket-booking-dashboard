@@ -77,10 +77,7 @@ const router = createBrowserRouter([
             path: "transactions",
             element: <Support />,
           },
-          {
-            path: "content-management",
-            element: <AdminControls />,
-          },
+
           {
             path: "settings",
             element: <Settings />,

@@ -38,7 +38,12 @@ export default function Header() {
     "/settings": "Settings",
   };
 
-  const route = routeTitles[location.pathname] || "Dashboard";
+  const route =
+    routeTitles[location.pathname] ||
+    (() => {
+      const page = location.pathname.split("/")[2];
+      return page ? page.charAt(0).toUpperCase() + page.slice(1) : "Dashboard";
+    })();
 
   return (
     <div className="flex items-center justify-between w-full px-10 py-4  bg-[#040b1f] shadow-lg">

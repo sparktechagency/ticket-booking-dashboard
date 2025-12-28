@@ -104,7 +104,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
         <div className="p-5 bg-[#150d20] border border-white/20 rounded-lg mb-3">
           <Stack direction="row" alignItems="center" spacing={1} mb={2}>
             <FaUser className="w-5 h-5 text-[#bd85f1]" />
-            <p className="text-white font-display mb-4 flex items-center gap-2 text-2xl font-corona">
+            <p className="text-white font-display mb-4 flex items-center gap-2 text-2xl font-krona">
               Customer Information
             </p>
           </Stack>
@@ -156,7 +156,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
         >
           <Stack direction="row" alignItems="center" spacing={1} mb={1}>
             <FaHome className="w-5 h-5 text-[#bd85f1]" />
-            <p className="text-white font-display mb-4 flex items-center gap-2 text-2xl font-corona">
+            <p className="text-white font-display mb-4 flex items-center gap-2 text-2xl font-krona">
               Delivery Address
             </p>
           </Stack>
@@ -175,7 +175,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
         >
           <Stack direction="row" alignItems="center" spacing={1} mb={2}>
             <GoPackage className="w-5 h-5 text-[#bd85f1]" />
-            <p className="text-white font-display mb-4 flex items-center gap-2 text-2xl font-corona">
+            <p className="text-white font-display mb-4 flex items-center gap-2 text-2xl font-krona">
               Event & Tickets
             </p>
           </Stack>
@@ -224,7 +224,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
         >
           <Stack direction="row" alignItems="center" spacing={1} mb={2}>
             <FaCreditCard className="w-5 h-5 text-[#bd85f1]" />
-            <p className="text-white font-display mb-4 flex items-center gap-2 text-2xl font-corona">
+            <p className="text-white font-display mb-4 flex items-center gap-2 text-2xl font-krona">
               Payment Summary
             </p>
           </Stack>
