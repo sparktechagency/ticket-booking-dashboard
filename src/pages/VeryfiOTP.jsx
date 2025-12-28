@@ -3,6 +3,7 @@ import { Button, Grid, Typography, Container } from "@mui/material";
 import OTPInput from "react-otp-input";
 import { HiArrowLeft } from "react-icons/hi";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 // import { useVerifyOtpMutation } from "../../Redux/api/authApi";
 // import { toast } from "sonner";
 
@@ -15,7 +16,7 @@ const VerifyOtp = () => {
     navigate("/update-password");
 
     if (otp.length < 6) {
-      alert("Please fill in all OTP fields");
+      toast.info("Please fill in all OTP fields");
       return;
     }
     // const token = localStorage.getItem("otpToken");

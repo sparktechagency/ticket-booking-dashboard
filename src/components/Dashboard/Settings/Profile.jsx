@@ -10,6 +10,7 @@ import { IoMdEye, IoIosEyeOff } from "react-icons/io";
 import { FaUser, FaLock, FaCamera, FaSave } from "react-icons/fa";
 
 import profileImg from "../../../../public/Images/profile.png";
+import { toast } from "sonner";
 
 export default function Profile() {
   const [adminProfile, setAdminProfile] = useState({
@@ -46,7 +47,7 @@ export default function Profile() {
 
   const handleUpdatePassword = () => {
     if (newPassword !== confirmPassword) {
-      alert("Passwords do not match!");
+      toast.error("Passwords do not match!");
       return;
     }
     console.log("Password Updated");

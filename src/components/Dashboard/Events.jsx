@@ -100,14 +100,14 @@ export default function Events() {
             setEditingEvent(null);
             setEventModalOpen(true);
           }}
-          className="bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] hover:from-[#5b189b] hover:to-[#a66fd9] text-white rounded-xl font-display transition-all hover:scale-105 shadow-lg shadow-[#6d1db9]/30"
-          startIcon={<FaPlus fontSize={12} />}
+          className="bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] hover:from-[#5b189b] hover:to-[#a66fd9] text-white rounded-xl transition-all hover:scale-105 shadow-lg shadow-[#6d1db9]/30"
+          startIcon={<FaPlus className="text-sm" />}
           sx={{
             display: "flex",
             alignItems: "center",
             gap: "2px",
             px: "20px",
-            py: "12px",
+            py: "8px",
             textTransform: "none",
             color: "white",
             borderRadius: "12px",
@@ -261,9 +261,9 @@ export default function Events() {
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 1,
+                    textTransform: "none",
                     px: 4,
-                    py: 1.5,
+                    py: 1,
                     backgroundColor: "rgba(189,133,241,0.1)",
                     color: "#bd85f1",
                     borderRadius: "12px",
@@ -278,9 +278,9 @@ export default function Events() {
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 1,
+                    textTransform: "none",
                     px: 4,
-                    py: 1.5,
+                    py: 1,
                     backgroundColor: "rgba(239,68,68,0.1)",
                     color: "#f87171",
                     borderRadius: "12px",
