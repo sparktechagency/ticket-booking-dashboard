@@ -14,7 +14,7 @@ import TermsAndConditions from "../Dashboard/Settings/TermsAndConditions";
 import AboutUs from "../Dashboard/Settings/AboutUs";
 import PrivacyPolicy from "../Dashboard/Settings/PrivacyPolicy";
 import RevenueManagement from "../Dashboard/Artists";
-import Support from "../Dashboard/Support";
+import Support from "../Dashboard/Transactions";
 import AddAvatar from "../Dashboard/Settings/AddAvatar";
 import Reliability from "../Dashboard/Users";
 import AdminControls from "../Dashboard/AdminControls";
