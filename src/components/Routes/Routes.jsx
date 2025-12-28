@@ -9,15 +9,9 @@ import VerifyOtp from "../../pages/VeryfiOTP";
 import UpdatePassword from "../../pages/UpdatePassword";
 import Profile from "../Dashboard/Settings/Profile";
 import { ContentManagement } from "../Dashboard/Settings/ContentManagement";
-import Faq from "../Dashboard/Settings/Faq";
-import TermsAndConditions from "../Dashboard/Settings/TermsAndConditions";
-import AboutUs from "../Dashboard/Settings/AboutUs";
-import PrivacyPolicy from "../Dashboard/Settings/PrivacyPolicy";
 import RevenueManagement from "../Dashboard/Artists";
 import Support from "../Dashboard/Transactions";
-import AddAvatar from "../Dashboard/Settings/AddAvatar";
 import Reliability from "../Dashboard/Users";
-import Settings from "../Dashboard/Settings";
 import Events from "../Dashboard/Events";
 import Orders from "../Dashboard/Orders";
 
@@ -77,32 +71,12 @@ const router = createBrowserRouter([
           },
 
           {
-            path: "settings",
-            element: <Settings />,
-          },
-          {
             path: "settings/profile",
             element: <Profile />,
           },
           {
             path: "settings/content-management",
             element: <ContentManagement />,
-          },
-          {
-            path: "settings/terms-and-condition",
-            element: <TermsAndConditions />,
-          },
-          {
-            path: "settings/about-us",
-            element: <AboutUs />,
-          },
-          {
-            path: "settings/privacy-policy",
-            element: <PrivacyPolicy />,
-          },
-          {
-            path: "settings/faq",
-            element: <Faq />,
           },
           {
             path: "notifications",

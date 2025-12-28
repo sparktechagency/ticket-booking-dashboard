@@ -6,6 +6,10 @@ import { FiHelpCircle, FiMail } from "react-icons/fi";
 import { toast } from "sonner";
 import { demoCmsContent } from "../../../../public/data/cmdData";
 import FAQ from "./ContentManagement/FAQ";
+import ContactInfo from "./ContentManagement/ContactInfo";
+import RefundPolicy from "./ContentManagement/RefundPolicy";
+import PrivacyPolicy from "./ContentManagement/PrivacyPolicy";
+import TermsAndConditions from "./ContentManagement/TermsAndConditions";
 
 export function ContentManagement() {
   const [activeSection, setActiveSection] = useState("contact");
@@ -122,73 +126,11 @@ export function ContentManagement() {
 
       {/* Contact Page Section */}
       {activeSection === "contact" && (
-        <div className="space-y-6">
-          <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#bd85f1]/20 to-[#6d1db9]/10 rounded-xl flex items-center justify-center">
-                <FiMail className="w-5 h-5 text-[#bd85f1]" />
-              </div>
-              <h3 className="text-xl text-white font-display">
-                Contact Information
-              </h3>
-            </div>
-            <div className="space-y-4">
-              <TextField
-                fullWidth
-                label="Contact Email"
-                type="email"
-                value={cmsContent.contactEmail}
-                onChange={(e) =>
-                  setCmsContent({
-                    ...cmsContent,
-                    contactEmail: e.target.value,
-                  })
-                }
-                sx={textFieldStyles}
-              />
-
-              <TextField
-                fullWidth
-                label="Contact Phone"
-                type="tel"
-                value={cmsContent.contactPhone}
-                onChange={(e) =>
-                  setCmsContent({
-                    ...cmsContent,
-                    contactPhone: e.target.value,
-                  })
-                }
-                sx={textFieldStyles}
-              />
-
-              <TextField
-                fullWidth
-                label="Physical Address"
-                value={cmsContent.contactAddress}
-                onChange={(e) =>
-                  setCmsContent({
-                    ...cmsContent,
-                    contactAddress: e.target.value,
-                  })
-                }
-                sx={textFieldStyles}
-              />
-
-              <TextField
-                fullWidth
-                label="Chat Support Text"
-                value={cmsContent.contactChatText}
-                onChange={(e) =>
-                  setCmsContent({
-                    ...cmsContent,
-                    contactChatText: e.target.value,
-                  })
-                }
-                sx={textFieldStyles}
-              />
-            </div>
-          </div>
-        </div>
+        <ContactInfo
+          cmsContent={cmsContent}
+          setCmsContent={setCmsContent}
+          textFieldStyles={textFieldStyles}
+        />
       )}
 
       {/* FAQ Section */}
@@ -201,175 +143,13 @@ export function ContentManagement() {
       )}
 
       {/* Refund Policy Section */}
-      {activeSection === "refund" && (
-        <div className="space-y-6">
-          <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#bd85f1]/20 to-[#6d1db9]/10 rounded-xl flex items-center justify-center">
-                <FaShield className="w-5 h-5 text-[#bd85f1]" />
-              </div>
-              <h3 className="text-xl text-white font-display">Refund Policy</h3>
-            </div>
-            <div className="space-y-6">
-              {Object.entries(cmsContent.refundPolicy).map(([key, section]) => (
-                <div key={key} className="space-y-3">
-                  <TextField
-                    fullWidth
-                    label={`${section.title} - Title`}
-                    value={section.title}
-                    onChange={(e) =>
-                      setCmsContent({
-                        ...cmsContent,
-                        refundPolicy: {
-                          ...cmsContent.refundPolicy,
-                          [key]: {
-                            ...section,
-                            title: e.target.value,
-                          },
-                        },
-                      })
-                    }
-                    sx={textFieldStyles}
-                  />
-
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={4}
-                    label={`${section.title} - Content`}
-                    value={section.content}
-                    onChange={(e) =>
-                      setCmsContent({
-                        ...cmsContent,
-                        refundPolicy: {
-                          ...cmsContent.refundPolicy,
-                          [key]: {
-                            ...section,
-                            content: e.target.value,
-                          },
-                        },
-                      })
-                    }
-                    sx={textFieldStyles}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      {activeSection === "refund" && <RefundPolicy />}
 
       {/* Privacy Policy Section */}
-      {activeSection === "privacy" && (
-        <div className="space-y-6">
-          <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#bd85f1]/20 to-[#6d1db9]/10 rounded-xl flex items-center justify-center">
-                <FaFile className="w-5 h-5 text-[#bd85f1]" />
-              </div>
-              <h3 className="text-xl text-white font-display">
-                Privacy Policy
-              </h3>
-            </div>
-            <div className="space-y-4">
-              {cmsContent.privacyPolicy.map((section, index) => (
-                <div
-                  key={section.id}
-                  className="p-4 bg-white/5 rounded-xl space-y-3"
-                >
-                  <TextField
-                    fullWidth
-                    label={`Section ${index + 1} Title`}
-                    value={section.title}
-                    onChange={(e) => {
-                      const updated = [...cmsContent.privacyPolicy];
-                      updated[index].title = e.target.value;
-                      setCmsContent({
-                        ...cmsContent,
-                        privacyPolicy: updated,
-                      });
-                    }}
-                    sx={textFieldStyles}
-                  />
-
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={4}
-                    label="Content"
-                    value={section.content}
-                    onChange={(e) => {
-                      const updated = [...cmsContent.privacyPolicy];
-                      updated[index].content = e.target.value;
-                      setCmsContent({
-                        ...cmsContent,
-                        privacyPolicy: updated,
-                      });
-                    }}
-                    sx={textFieldStyles}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      {activeSection === "privacy" && <PrivacyPolicy />}
 
       {/* Terms & Conditions Section */}
-      {activeSection === "terms" && (
-        <div className="space-y-6">
-          <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#bd85f1]/20 to-[#6d1db9]/10 rounded-xl flex items-center justify-center">
-                <FaFile className="w-5 h-5 text-[#bd85f1]" />
-              </div>
-              <h3 className="text-xl text-white font-display">
-                Terms & Conditions
-              </h3>
-            </div>
-            <div className="space-y-4">
-              {cmsContent.termsConditions.map((section, index) => (
-                <div
-                  key={section.id}
-                  className="p-4 bg-white/5 rounded-xl space-y-3"
-                >
-                  <TextField
-                    fullWidth
-                    label={`Section ${index + 1} Title`}
-                    value={section.title}
-                    onChange={(e) => {
-                      const updated = [...cmsContent.termsConditions];
-                      updated[index].title = e.target.value;
-                      setCmsContent({
-                        ...cmsContent,
-                        termsConditions: updated,
-                      });
-                    }}
-                    sx={textFieldStyles}
-                  />
-
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={4}
-                    label="Content"
-                    value={section.content}
-                    onChange={(e) => {
-                      const updated = [...cmsContent.termsConditions];
-                      updated[index].content = e.target.value;
-                      setCmsContent({
-                        ...cmsContent,
-                        termsConditions: updated,
-                      });
-                    }}
-                    sx={textFieldStyles}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      {activeSection === "terms" && <TermsAndConditions />}
 
       {/* Save Button */}
       <div className="flex justify-end">
@@ -379,11 +159,11 @@ export function ContentManagement() {
           startIcon={<FaSave className="w-4 h-4" />}
           sx={{
             px: 3,
-            py: 1.5,
+            py: 1,
             background: "linear-gradient(to right, #6d1db9, #bd85f1)",
             borderRadius: "12px",
             textTransform: "none",
-            fontSize: "1rem",
+            fontSize: "14px",
             boxShadow: "0 10px 40px rgba(109, 29, 185, 0.3)",
             "&:hover": {
               background: "linear-gradient(to right, #5b189b, #a66fd9)",
