@@ -9,9 +9,21 @@ import { useRef, useState } from "react";
 import { Button } from "@mui/material";
 import { MdArrowBackIosNew } from "react-icons/md";
 
-const AboutUs = () => {
+const TermsAndConditions = () => {
   const editor = useRef(null);
   const [content, setContent] = useState("");
+
+  const config = {
+    readonly: false,
+    height: "450px",
+    width: "100%",
+    theme: "dark",
+    style: {
+      background: "linear-gradient(to right, #080014, #030a1d)",
+      border: "1px solid rgba(189, 133, 241, 0.3)",
+      color: "white",
+    },
+  };
 
   // const {
   //   data: getSettingsData,
@@ -66,55 +78,62 @@ const AboutUs = () => {
   // }
 
   return (
-    <div className="min-h-[90vh] bg-[#fbfbfb] rounded-lg py-5 px-4">
-      <Button
-        onClick={() => window.history.back()}
-        sx={{
-          backgroundColor: "#2B7FFF",
-          color: "white",
-          padding: "5px",
-          width: "10px",
-          height: "30px",
-          ":hover": {
-            backgroundColor: "white",
-            color: "#2B7FFF",
-            border: "1px solid #2B7FFF",
-          },
-        }}
-      >
-        <MdArrowBackIosNew />
-      </Button>{" "}
-      <div className="p-2 rounded">
-        <div className="flex items-center justify-between py-4">
-          <h1 className="text-4xl font-bold  text-[#222021]">About Us</h1>
+    <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 backdrop-blur-xl border border-white/10 rounded-3xl p-4">
+      <div className="flex items-center justify-between ">
+        <div className="flex items-center gap-2">
           <Button
-            onClick={handleOnSave}
+            onClick={() => window.history.back()}
             sx={{
-              width: "150px",
-              bgcolor: "#2B7FFF",
-              color: "white",
+              py: 1,
+              background: "linear-gradient(to right, #6d1db9, #bd85f1)",
+              borderRadius: "12px",
               textTransform: "none",
-              height: "40px",
-              fontSize: "16px",
-              ":hover": {
-                bgcolor: "#242424",
-                borderColor: "#0080FF",
+              color: "white",
+              fontSize: "14px",
+              boxShadow: "0 10px 40px rgba(109, 29, 185, 0.3)",
+              "&:hover": {
+                background: "linear-gradient(to right, #5b189b, #a66fd9)",
+                transform: "scale(1.05)",
               },
             }}
           >
-            Save & Change
-          </Button>
+            <MdArrowBackIosNew />
+          </Button>{" "}
+          <h1 className="text-2xl font-bold  text-white font-krona">
+            Terms And Conditions
+          </h1>{" "}
         </div>
-        <div className="my-5">
-          <JoditEditor
-            ref={editor}
-            value={content}
-            config={{ height: 500, theme: "light", readonly: false }}
-            onBlur={(newContent) => setContent(newContent)}
-          />
-        </div>
+        <Button
+          onClick={handleOnSave}
+          sx={{
+            px: 3,
+            py: 1,
+            background: "linear-gradient(to right, #6d1db9, #bd85f1)",
+            borderRadius: "12px",
+            textTransform: "none",
+            color: "white",
+            fontSize: "14px",
+            boxShadow: "0 10px 40px rgba(109, 29, 185, 0.3)",
+            "&:hover": {
+              background: "linear-gradient(to right, #5b189b, #a66fd9)",
+              transform: "scale(1.05)",
+            },
+            transition: "all 0.3s",
+          }}
+        >
+          Save & Change
+        </Button>
+      </div>
+
+      <div className="my-3">
+        <JoditEditor
+          ref={editor}
+          value={content}
+          config={config}
+          onBlur={(newContent) => setContent(newContent)}
+        />
       </div>
     </div>
   );
 };
-export default AboutUs;
+export default TermsAndConditions;

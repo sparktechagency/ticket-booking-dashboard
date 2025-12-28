@@ -38,7 +38,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="bg-[#a9e9f3] min-h-[100vh]">
+    <div className="bg-[#0a0d27] min-h-[100vh]">
       <Container maxWidth="lg">
         <Grid
           container
@@ -47,19 +47,15 @@ const ForgotPassword = () => {
           alignItems="center"
           style={{ minHeight: "80vh" }}
         >
-          <div className="bg-[#fff] rounded-lg p-5 border border-[#875473]">
-            <div className="mb-6">
+          <div className="bg-[#140f36] rounded-lg p-5 border border-[#875473]">
+            <div className="mb-6 text-white">
               <div className="flex items-center gap-3 mb-4">
                 <Link to="/sign-in" className="cursor-pointer">
-                  <HiArrowLeft style={{ fontSize: "24px", color: "black" }} />
+                  <HiArrowLeft style={{ fontSize: "24px" }} />
                 </Link>
-                <p className="text-2xl font-medium">Forget Password</p>
+                <p className="text-2xl  font-medium">Forget Password</p>
               </div>
-              <Typography
-                variant="body1"
-                color="textSecondary"
-                style={{ marginBottom: "20px" }}
-              >
+              <Typography variant="body1" style={{ marginBottom: "20px" }}>
                 Please enter your email address to reset your password
               </Typography>
             </div>
@@ -77,23 +73,38 @@ const ForgotPassword = () => {
                 onChange={handleEmailChange}
                 InputProps={{
                   startAdornment: (
-                    <IoMailOpen
-                      style={{ fontSize: "24px", marginRight: "8px" }}
-                    />
+                    <IoMailOpen className="text-2xl mr-2 text-white/50" />
                   ),
                 }}
                 sx={{
                   "& .MuiOutlinedInput-root": {
+                    height: "50px",
+                    color: "#fff",
+
+                    "& fieldset": {
+                      borderColor: "#fff",
+                    },
+
+                    "&:hover fieldset": {
+                      borderColor: "#a06a8d",
+                    },
+
                     "&.Mui-focused fieldset": {
-                      borderColor: "#2B7FFF", // Change border color on focus
+                      borderColor: "#875473",
                     },
                   },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#2B7FFF", // Change label color on focus (optional)
+
+                  "& .MuiInputLabel-root": {
+                    color: "#875473",
                   },
-                  height: "50px", // Set the height of the TextField
-                  "& .MuiInputBase-root": {
-                    height: "100%", // Ensure the input base fills the TextField height
+
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: "#875473",
+                  },
+
+                  "& input::placeholder": {
+                    color: "#fff",
+                    opacity: 0.5,
                   },
                 }}
               />
@@ -103,14 +114,19 @@ const ForgotPassword = () => {
                 fullWidth
                 variant="contained"
                 color="primary"
-                style={{
-                  marginTop: "20px",
-                  backgroundColor: "#2B7FFF",
-                  padding: "8px",
-                  fontWeight: "bold",
-                  borderRadius: "10px",
-                  fontSize: "16px",
+                sx={{
+                  px: 3,
+                  py: 1,
+                  background: "linear-gradient(to right, #6d1db9, #bd85f1)",
+                  borderRadius: "12px",
                   textTransform: "none",
+                  fontSize: "14px",
+                  boxShadow: "0 10px 40px rgba(109, 29, 185, 0.3)",
+                  "&:hover": {
+                    background: "linear-gradient(to right, #5b189b, #a66fd9)",
+                    transform: "scale(1.05)",
+                  },
+                  transition: "all 0.3s",
                 }}
               >
                 Send OTP

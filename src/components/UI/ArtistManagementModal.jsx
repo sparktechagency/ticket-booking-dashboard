@@ -9,6 +9,8 @@ import {
   FaFacebook,
   FaGlobe,
 } from "react-icons/fa";
+import { MdDeleteForever } from "react-icons/md";
+import { toast } from "sonner";
 
 const GENRE_OPTIONS = [
   "Pop",
@@ -101,11 +103,11 @@ export function ArtistManagementModal({ artist, isOpen, onClose, onSave }) {
 
   const handleSave = () => {
     if (!formData.name || !formData.genre) {
-      alert("Artist name and genre are required");
+      toast.warning("Artist name and genre are required");
       return;
     }
     if (!formData.imageUrl) {
-      alert("Please upload an artist image");
+      toast.warning("Please upload an artist image");
       return;
     }
     onSave(formData);
@@ -137,6 +139,7 @@ export function ArtistManagementModal({ artist, isOpen, onClose, onSave }) {
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Image Upload */}
+          {/* Image Upload / Edit */}
           <div>
             <label className="block text-sm text-[#99a1af] mb-2">
               Artist Image *
@@ -151,31 +154,68 @@ export function ArtistManagementModal({ artist, isOpen, onClose, onSave }) {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                  <div className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
                     <FaUpload className="text-[#99a1af] text-3xl mb-2" />
                     <span className="text-sm text-[#99a1af]">Upload Photo</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-                  </label>
+                  </div>
+                )}
+
+                {/* Hidden input for upload/edit */}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setImagePreview(reader.result);
+                      setFormData((prev) => ({
+                        ...prev,
+                        imageUrl: reader.result,
+                        imageFile: file,
+                      }));
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+
+                {imagePreview && (
+                  <div className="absolute bottom-2 right-2 flex gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // prevent opening file dialog
+                        setImagePreview("");
+                        setFormData((prev) => ({
+                          ...prev,
+                          imageUrl: "",
+                          imageFile: null,
+                        }));
+                      }}
+                      className="bg-red-500/20 hover:bg-red-500/40 text-white rounded-full p-1  flex items-center gap-1 cursor-pointer"
+                    >
+                      <MdDeleteForever className="text-xl" />
+                    </button>
+                    {/* <span className="bg-white/20 text-white rounded-full p-1 text-xs flex items-center gap-1">
+                      <FaUpload /> Change
+                    </span> */}
+                  </div>
                 )}
               </div>
 
               <div className="flex flex-col justify-center gap-2 text-sm text-[#99a1af]">
                 <div className="flex items-center gap-2">
-                  <FaCheckCircle className="text-green-400" />
-                  Square image recommended
+                  <FaCheckCircle className="text-green-400" /> Square image
+                  recommended
                 </div>
                 <div className="flex items-center gap-2">
-                  <FaCheckCircle className="text-green-400" />
-                  Minimum 400×400 px
+                  <FaCheckCircle className="text-green-400" /> Minimum 400×400
+                  px
                 </div>
                 <div className="flex items-center gap-2">
-                  <FaCheckCircle className="text-green-400" />
-                  Max size 3MB
+                  <FaCheckCircle className="text-green-400" /> Max size 3MB
                 </div>
               </div>
             </div>

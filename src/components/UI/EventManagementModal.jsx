@@ -5,32 +5,14 @@ import {
   Backdrop,
   Tabs,
   Tab,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Switch,
-  FormControlLabel,
   Button,
   IconButton,
-  Alert,
-  InputAdornment,
-  Avatar,
   Paper,
 } from "@mui/material";
-import {
-  MdClose,
-  MdAdd,
-  MdDelete,
-  MdSave,
-  MdCalendarToday,
-  MdLocationOn,
-  MdAccessTime,
-  MdImage,
-  MdMap,
-  MdPalette,
-} from "react-icons/md";
+import { MdClose, MdSave } from "react-icons/md";
+import { toast } from "sonner";
+import TicketsAndPricing from "./TicketsAndPricing";
+import EventDetailsForm from "./EventDetailsForm";
 
 const DEFAULT_COLORS = [
   "#FFD700",
@@ -56,6 +38,34 @@ const COLOR_NAMES = {
   "#EC4899": "Pink",
   "#8B5CF6": "Violet",
   "#14B8A6": "Teal",
+};
+
+const darkFieldSx = {
+  bgcolor: "#030a1d",
+  color: "white",
+  borderRadius: "12px",
+
+  "& .MuiInputBase-input": {
+    color: "white",
+  },
+
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: "rgba(255,255,255,0.15)",
+  },
+
+  "&:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "rgba(255,255,255,0.3)",
+  },
+
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "#8b5cf6",
+  },
+};
+const darkLabelSx = {
+  color: "#9ca3af",
+  "&.Mui-focused": {
+    color: "#c4b5fd",
+  },
 };
 
 export function EventManagementModal({
@@ -187,11 +197,11 @@ export function EventManagementModal({
       !formData.venue ||
       !formData.city
     ) {
-      alert("Please fill in all required fields.");
+      toast.warning("Please fill in all required fields.");
       return;
     }
     if (!formData.imageUrl) {
-      alert("Please upload an event thumbnail.");
+      toast.warning("Please upload an event thumbnail.");
       return;
     }
     if (formData.ticketsAvailable) {
@@ -199,7 +209,7 @@ export function EventManagementModal({
         (c) => !c.name || c.basePrice <= 0 || c.totalQuantity <= 0
       );
       if (invalid) {
-        alert("Please complete all ticket category information.");
+        toast.warning("Please complete all ticket category information.");
         return;
       }
     }
@@ -227,7 +237,7 @@ export function EventManagementModal({
             maxWidth: "900px",
             maxHeight: "90vh",
             background:
-              "linear-gradient(to bottom right, rgba(109, 29, 185), #080014, rgba(3, 10, 29))",
+              "linear-gradient(to bottom right, rgba(125, 80, 200, 0.35), rgba(40, 25, 70, 0.9), rgba(55, 55, 90, 0.95))",
             color: "white",
             borderRadius: "16px",
             overflow: "hidden",
@@ -238,7 +248,7 @@ export function EventManagementModal({
           {/* Header */}
           <div
             style={{
-              bgcolor: "#1a0033",
+              bgcolor: "",
               padding: "15px",
               position: "relative",
             }}
@@ -265,6 +275,7 @@ export function EventManagementModal({
             onChange={(_, v) => setActiveTab(v)}
             sx={{
               borderBottom: "1px solid rgba(255,255,255,0.1)",
+              height: "40px",
               backgroundColor: "#160e22",
               "& .MuiTabs-indicator": {
                 backgroundColor: "#bd85f1",
@@ -319,598 +330,30 @@ export function EventManagementModal({
           {/* Content */}
           <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
             {activeTab === 0 && (
-              <>
-                {/* Image Uploads */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "24px",
-                    marginBottom: "32px",
-                  }}
-                >
-                  <div style={{ flex: "1 1 300px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        color: "#99a1af",
-                        fontSize: "0.875rem",
-                        marginBottom: "8px",
-                      }}
-                    >
-                      Event Thumbnail *
-                    </label>
-                    <div
-                      style={{
-                        height: "260px",
-                        border: "2px dashed #444",
-                        borderRadius: "12px",
-                        overflow: "hidden",
-                        position: "relative",
-                        backgroundColor: "#030a1d",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {imagePreview ? (
-                        <img
-                          src={imagePreview}
-                          alt="Thumbnail"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-                      ) : (
-                        <label
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            height: "100%",
-                            color: "#99a1af",
-                          }}
-                        >
-                          <MdImage size={48} />
-                          <span style={{ marginTop: "12px" }}>
-                            Upload Thumbnail
-                          </span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                            style={{ display: "none" }}
-                          />
-                        </label>
-                      )}
-                      {imagePreview && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            inset: 0,
-                            background: "rgba(0,0,0,0.6)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            opacity: 0,
-                            transition: "opacity 0.3s",
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.opacity = 1)
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.opacity = 0)
-                          }
-                        >
-                          <label style={{ cursor: "pointer" }}>
-                            <span
-                              style={{
-                                background: "rgba(255,255,255,0.15)",
-                                padding: "12px 24px",
-                                borderRadius: "12px",
-                                backdropFilter: "blur(8px)",
-                                fontSize: "0.95rem",
-                              }}
-                            >
-                              Change Image
-                            </span>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageUpload}
-                              style={{ display: "none" }}
-                            />
-                          </label>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div style={{ flex: "1 1 300px" }}>
-                    <label
-                      style={{
-                        display: "block",
-                        color: "#99a1af",
-                        fontSize: "0.875rem",
-                        marginBottom: "8px",
-                      }}
-                    >
-                      Stadium / Seating Chart
-                    </label>
-                    <div
-                      style={{
-                        height: "260px",
-                        border: "2px dashed #444",
-                        borderRadius: "12px",
-                        overflow: "hidden",
-                        position: "relative",
-                        backgroundColor: "#030a1d",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {seatingPreview ? (
-                        <img
-                          src={seatingPreview}
-                          alt="Seating"
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                          }}
-                        />
-                      ) : (
-                        <label
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            height: "100%",
-                            color: "#99a1af",
-                          }}
-                        >
-                          <MdMap size={48} />
-                          <span style={{ marginTop: "12px" }}>
-                            Upload Seating Chart
-                          </span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleSeatingUpload}
-                            style={{ display: "none" }}
-                          />
-                        </label>
-                      )}
-                      {seatingPreview && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            inset: 0,
-                            background: "rgba(0,0,0,0.6)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            opacity: 0,
-                            transition: "opacity 0.3s",
-                          }}
-                          onMouseEnter={(e) =>
-                            (e.currentTarget.style.opacity = 1)
-                          }
-                          onMouseLeave={(e) =>
-                            (e.currentTarget.style.opacity = 0)
-                          }
-                        >
-                          <label style={{ cursor: "pointer" }}>
-                            <span
-                              style={{
-                                background: "rgba(255,255,255,0.15)",
-                                padding: "12px 24px",
-                                borderRadius: "12px",
-                                backdropFilter: "blur(8px)",
-                                fontSize: "0.95rem",
-                              }}
-                            >
-                              Change Image
-                            </span>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={handleSeatingUpload}
-                              style={{ display: "none" }}
-                            />
-                          </label>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Form Fields */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "20px",
-                  }}
-                >
-                  <TextField
-                    fullWidth
-                    label="Event Title *"
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        title: e.target.value,
-                      }))
-                    }
-                    variant="outlined"
-                    InputProps={{ sx: { bgcolor: "#030a1d", color: "white" } }}
-                    InputLabelProps={{ sx: { color: "#99a1af" } }}
-                  />
-
-                  <FormControl fullWidth>
-                    <InputLabel sx={{ color: "#99a1af" }}>
-                      Artist/Performer *
-                    </InputLabel>
-                    <Select
-                      value={formData.artistId}
-                      onChange={(e) => handleArtistChange(e.target.value)}
-                      sx={{ bgcolor: "#030a1d", color: "white" }}
-                    >
-                      <MenuItem value="">Select an artist...</MenuItem>
-                      {artists?.map((artist) => (
-                        <MenuItem key={artist.id} value={artist.id}>
-                          {artist.name} - {artist.genre}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-
-                  <div style={{ display: "flex", gap: "16px" }}>
-                    <FormControl fullWidth>
-                      <InputLabel sx={{ color: "#99a1af" }}>
-                        Category
-                      </InputLabel>
-                      <Select
-                        value={formData.category}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            category: e.target.value,
-                          }))
-                        }
-                        sx={{ bgcolor: "#030a1d", color: "white" }}
-                      >
-                        <MenuItem value="concert">Concert</MenuItem>
-                        <MenuItem value="sports">Sports</MenuItem>
-                      </Select>
-                    </FormControl>
-
-                    <TextField
-                      fullWidth
-                      label="Date *"
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          date: e.target.value,
-                        }))
-                      }
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <MdCalendarToday />
-                          </InputAdornment>
-                        ),
-                        sx: { bgcolor: "#030a1d", color: "white" },
-                      }}
-                      InputLabelProps={{
-                        shrink: true,
-                        sx: { color: "#99a1af" },
-                      }}
-                    />
-
-                    <TextField
-                      fullWidth
-                      label="Time *"
-                      type="time"
-                      value={formData.time}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          time: e.target.value,
-                        }))
-                      }
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <MdAccessTime />
-                          </InputAdornment>
-                        ),
-                        sx: { bgcolor: "#030a1d", color: "white" },
-                      }}
-                      InputLabelProps={{
-                        shrink: true,
-                        sx: { color: "#99a1af" },
-                      }}
-                    />
-                  </div>
-
-                  <TextField
-                    fullWidth
-                    label="City *"
-                    value={formData.city}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, city: e.target.value }))
-                    }
-                    InputProps={{ sx: { bgcolor: "#030a1d", color: "white" } }}
-                    InputLabelProps={{ sx: { color: "#99a1af" } }}
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Venue Name *"
-                    value={formData.venue}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        venue: e.target.value,
-                      }))
-                    }
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <MdLocationOn />
-                        </InputAdornment>
-                      ),
-                      sx: { bgcolor: "#030a1d", color: "white" },
-                    }}
-                    InputLabelProps={{ sx: { color: "#99a1af" } }}
-                  />
-
-                  <TextField
-                    fullWidth
-                    label="Full Address (Optional)"
-                    value={formData.location}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        location: e.target.value,
-                      }))
-                    }
-                    InputProps={{ sx: { bgcolor: "#030a1d", color: "white" } }}
-                    InputLabelProps={{ sx: { color: "#99a1af" } }}
-                  />
-
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={4}
-                    label="Event Description"
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    InputProps={{ sx: { bgcolor: "#030a1d", color: "white" } }}
-                    InputLabelProps={{ sx: { color: "#99a1af" } }}
-                  />
-                </div>
-              </>
+              <EventDetailsForm
+                imagePreview={imagePreview}
+                handleImageUpload={handleImageUpload}
+                seatingPreview={seatingPreview}
+                handleSeatingUpload={handleSeatingUpload}
+                formData={formData}
+                setFormData={setFormData}
+                handleArtistChange={handleArtistChange}
+                artists={artists}
+              />
             )}
 
             {activeTab === 1 && (
-              <>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.ticketsAvailable}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          ticketsAvailable: e.target.checked,
-                        }))
-                      }
-                      color="primary"
-                    />
-                  }
-                  label="Tickets available for sale"
-                  sx={{ color: "white", mb: 4 }}
-                />
-
-                {formData.ticketsAvailable && (
-                  <>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        marginBottom: "24px",
-                      }}
-                    >
-                      <h3 style={{ margin: 0, fontSize: "1.4rem" }}>
-                        Ticket Categories
-                      </h3>
-                      <Button
-                        variant="contained"
-                        startIcon={<MdAdd />}
-                        onClick={addTicketCategory}
-                      >
-                        Add Category
-                      </Button>
-                    </div>
-
-                    {formData.ticketCategories.length === 0 && (
-                      <div
-                        style={{
-                          textAlign: "center",
-                          padding: "48px",
-                          background: "rgba(255,255,255,0.05)",
-                          borderRadius: "16px",
-                        }}
-                      >
-                        <p style={{ color: "#99a1af", fontSize: "1.1rem" }}>
-                          No ticket categories yet
-                        </p>
-                        <Button variant="contained" onClick={addTicketCategory}>
-                          Create First Category
-                        </Button>
-                      </div>
-                    )}
-
-                    {formData.ticketCategories.map((cat, index) => (
-                      <Paper
-                        key={cat.id}
-                        sx={{
-                          bgcolor: "rgba(255,255,255,0.05)",
-                          p: 3,
-                          mb: 3,
-                          borderRadius: "12px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            mb: 3,
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "12px",
-                            }}
-                          >
-                            <Avatar sx={{ bgcolor: cat.color }}>
-                              <MdPalette />
-                            </Avatar>
-                            <h4 style={{ margin: 0 }}>
-                              {cat.name || `Category ${index + 1}`}
-                            </h4>
-                          </div>
-                          <IconButton
-                            onClick={() => removeTicketCategory(cat.id)}
-                            color="error"
-                          >
-                            <MdDelete size={22} />
-                          </IconButton>
-                        </div>
-
-                        <div
-                          style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "16px",
-                          }}
-                        >
-                          <TextField
-                            fullWidth
-                            label="Ticket Name *"
-                            value={cat.name}
-                            onChange={(e) =>
-                              updateTicketCategory(cat.id, {
-                                name: e.target.value,
-                              })
-                            }
-                            InputProps={{ sx: { bgcolor: "#030a1d" } }}
-                          />
-
-                          <FormControl fullWidth>
-                            <InputLabel>Color</InputLabel>
-                            <Select
-                              value={cat.color}
-                              onChange={(e) =>
-                                updateTicketCategory(cat.id, {
-                                  color: e.target.value,
-                                })
-                              }
-                              sx={{ bgcolor: "#030a1d" }}
-                            >
-                              {DEFAULT_COLORS.map((color) => (
-                                <MenuItem key={color} value={color}>
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "10px",
-                                    }}
-                                  >
-                                    <div
-                                      style={{
-                                        width: "24px",
-                                        height: "24px",
-                                        backgroundColor: color,
-                                        borderRadius: "6px",
-                                      }}
-                                    />
-                                    {COLOR_NAMES[color]}
-                                  </div>
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-
-                          <div style={{ display: "flex", gap: "16px" }}>
-                            <TextField
-                              fullWidth
-                              label="Price per Ticket ($)"
-                              type="number"
-                              value={cat.basePrice}
-                              onChange={(e) =>
-                                updateTicketCategory(cat.id, {
-                                  basePrice: Number(e.target.value) || 0,
-                                })
-                              }
-                              InputProps={{ sx: { bgcolor: "#030a1d" } }}
-                            />
-                            <TextField
-                              fullWidth
-                              label="Total Quantity"
-                              type="number"
-                              value={cat.totalQuantity}
-                              onChange={(e) => {
-                                const qty = Number(e.target.value) || 0;
-                                updateTicketCategory(cat.id, {
-                                  totalQuantity: qty,
-                                  availableQuantity: qty,
-                                });
-                              }}
-                              InputProps={{ sx: { bgcolor: "#030a1d" } }}
-                            />
-                          </div>
-
-                          <TextField
-                            fullWidth
-                            multiline
-                            rows={2}
-                            label="Notes (optional)"
-                            value={cat.notes}
-                            onChange={(e) =>
-                              updateTicketCategory(cat.id, {
-                                notes: e.target.value,
-                              })
-                            }
-                            InputProps={{ sx: { bgcolor: "#030a1d" } }}
-                          />
-                        </div>
-                      </Paper>
-                    ))}
-                  </>
-                )}
-
-                {!formData.ticketsAvailable && (
-                  <Alert severity="warning" sx={{ mt: 2 }}>
-                    Tickets are not available. The event will be published
-                    without ticket sales.
-                  </Alert>
-                )}
-              </>
+              <TicketsAndPricing
+                formData={formData}
+                setFormData={setFormData}
+                addTicketCategory={addTicketCategory}
+                removeTicketCategory={removeTicketCategory}
+                updateTicketCategory={updateTicketCategory}
+                darkFieldSx={darkFieldSx}
+                darkLabelSx={darkLabelSx}
+                DEFAULT_COLORS={DEFAULT_COLORS}
+                COLOR_NAMES={COLOR_NAMES}
+              />
             )}
           </div>
 
@@ -926,7 +369,14 @@ export function EventManagementModal({
           >
             <Button
               onClick={onClose}
-              sx={{ color: "white", minWidth: "120px" }}
+              sx={{
+                bgcolor: "#111cc",
+                border: "1px solid #6d1db9aa",
+                "&:hover": { bgcolor: "#5b189baa" },
+                minWidth: "150px",
+                textTransform: "none",
+                color: "white",
+              }}
             >
               Cancel
             </Button>
@@ -938,6 +388,7 @@ export function EventManagementModal({
                 bgcolor: "#6d1db9",
                 "&:hover": { bgcolor: "#5b189b" },
                 minWidth: "160px",
+                textTransform: "none",
               }}
             >
               {event ? "Update Event" : "Create Event"}

@@ -1,21 +1,25 @@
 import { useState } from "react";
-
-import { MdOutlineDashboard, MdOutlineEventNote } from "react-icons/md";
-import { FiUsers } from "react-icons/fi";
-import { FaTicketAlt, FaMusic, FaDollarSign } from "react-icons/fa";
+import { MdOutlineDashboard } from "react-icons/md";
+import { FiUsers, FiChevronDown, FiChevronUp } from "react-icons/fi";
+import { FaTicketAlt, FaMusic, FaDollarSign, FaUser } from "react-icons/fa";
 import { FaArrowTrendUp } from "react-icons/fa6";
 import { IoSettingsOutline } from "react-icons/io5";
-
-import { Link, NavLink } from "react-router-dom";
-
+import { MdContentPaste } from "react-icons/md";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import logo from "../../../public/Images/logo.png";
 
 export default function Sidebar() {
   const [selected, setSelected] = useState(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const location = useLocation();
 
   const handleSelect = (path) => {
     setSelected(path);
   };
+
+  const isSettingsActive =
+    location.pathname === "/settings/profile" ||
+    location.pathname === "/settings/content";
 
   return (
     <div className="bg-[#140f36] h-screen w-full shadow-2xl">
@@ -42,7 +46,6 @@ export default function Sidebar() {
             icon: <FaMusic fontSize={16} />,
             label: "Artists",
           },
-
           {
             to: "/orders",
             icon: <FaDollarSign fontSize={18} />,
@@ -58,22 +61,6 @@ export default function Sidebar() {
             icon: <FaArrowTrendUp fontSize={18} />,
             label: "Transactions",
           },
-          {
-            to: "/content-management",
-            icon: <MdOutlineEventNote fontSize={18} />,
-            label: "Content (CMS)",
-          },
-          {
-            to: "/settings",
-            icon: <IoSettingsOutline fontSize={18} />,
-            label: "Settings",
-          },
-
-          // {
-          //   to: "/edit-profile",
-          //   icon: <FaRegUserCircle fontSize={24} />,
-          //   label: "Edit Profile",
-          // },
         ].map(({ to, icon, label }) => (
           <NavLink
             key={to}
@@ -88,13 +75,76 @@ export default function Sidebar() {
                   ? "bg-[#bd85f1] text-black"
                   : "text-[#99a1af] hover:text-white hover:bg-white/5"
               }
-              hover:bg-[#bd85f1] hover:text-[#fff]`
+              hover:bg-[#bd85f1] hover:text-[#fff] transition-all`
             }
           >
             {icon}
             <p>{label}</p>
           </NavLink>
         ))}
+
+        {/* Settings with Submenu */}
+        <div>
+          <button
+            onClick={() => setSettingsOpen(!settingsOpen)}
+            className={`w-full flex items-center justify-between font-medium gap-3 text-sm py-2 px-2 rounded-md transition-all
+              ${
+                isSettingsActive
+                  ? "bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] text-white shadow-lg shadow-[#6d1db9]/30"
+                  : "text-[#99a1af] hover:text-white hover:bg-white/5"
+              }
+              hover:bg-[#bd85f1] hover:text-[#fff]`}
+          >
+            <div className="flex items-center gap-3">
+              <IoSettingsOutline fontSize={18} />
+              <p>Settings</p>
+            </div>
+            {settingsOpen ? (
+              <FiChevronUp fontSize={16} />
+            ) : (
+              <FiChevronDown fontSize={16} />
+            )}
+          </button>
+
+          {/* Submenu */}
+          {settingsOpen && (
+            <div className="ml-4 mt-1 space-y-1">
+              <NavLink
+                to="/settings/profile"
+                onClick={() => handleSelect("/settings/profile")}
+                className={({ isActive }) =>
+                  `flex items-center font-medium gap-3 text-sm py-2 px-2 rounded-md transition-all
+                  ${
+                    isActive
+                      ? "bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] text-white shadow-lg shadow-[#6d1db9]/30"
+                      : "text-[#99a1af] hover:text-white hover:bg-white/5"
+                  }
+                  hover:bg-[#bd85f1] hover:text-[#fff]`
+                }
+              >
+                <FaUser fontSize={14} />
+                <p>Profile</p>
+              </NavLink>
+
+              <NavLink
+                to="/settings/content-management"
+                onClick={() => handleSelect("/settings/content-management")}
+                className={({ isActive }) =>
+                  `flex items-center font-medium gap-3 text-sm py-2 px-2 rounded-md transition-all
+                  ${
+                    isActive
+                      ? "bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] text-white shadow-lg shadow-[#6d1db9]/30"
+                      : "text-[#99a1af] hover:text-white hover:bg-white/5"
+                  }
+                  hover:bg-[#bd85f1] hover:text-[#fff]`
+                }
+              >
+                <MdContentPaste fontSize={14} />
+                <p>Content Management</p>
+              </NavLink>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import {
   FormControlLabel,
   Container,
   Grid,
+  InputAdornment,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineMailOpen } from "react-icons/hi";
@@ -47,7 +48,7 @@ const SignIn = () => {
   };
 
   return (
-    <div className="bg-[#a9e9f3] min-h-[100vh]">
+    <div className="bg-[#0a0d27] min-h-[100vh]">
       <Container maxWidth="lg">
         <Grid
           container
@@ -56,8 +57,8 @@ const SignIn = () => {
           alignItems="center"
           style={{ minHeight: "80vh" }}
         >
-          <div className="bg-[#fff] rounded-lg p-5 border border-[#875473]">
-            <p className="text-3xl text-center font-semibold mb-7">
+          <div className="bg-[#140f36] rounded-lg p-5 border border-[#875473]">
+            <p className="text-3xl text-center font-semibold mb-7 text-white">
               Sign in to continue!
             </p>
 
@@ -72,24 +73,44 @@ const SignIn = () => {
                 variant="outlined"
                 placeholder="Enter your email"
                 InputProps={{
-                  startAdornment: <HiOutlineMailOpen />,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <HiOutlineMailOpen size={20} color="#875473" />
+                    </InputAdornment>
+                  ),
                 }}
                 sx={{
                   "& .MuiOutlinedInput-root": {
+                    height: "50px",
+                    color: "#fff",
+
+                    "& fieldset": {
+                      borderColor: "#fff",
+                    },
+
+                    "&:hover fieldset": {
+                      borderColor: "#a06a8d",
+                    },
+
                     "&.Mui-focused fieldset": {
-                      borderColor: "#2B7FFF", // Change border color on focus
+                      borderColor: "#875473",
                     },
                   },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#2B7FFF", // Change label color on focus (optional)
+
+                  "& .MuiInputLabel-root": {
+                    color: "#875473",
                   },
-                  height: "50px", // Set the height of the TextField
-                  "& .MuiInputBase-root": {
-                    height: "100%", // Ensure the input base fills the TextField height
+
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: "#875473",
+                  },
+
+                  "& input::placeholder": {
+                    color: "#fff",
+                    opacity: 0.5,
                   },
                 }}
               />
-
               <TextField
                 label="Password"
                 name="password"
@@ -100,26 +121,44 @@ const SignIn = () => {
                 variant="outlined"
                 placeholder="Enter your password"
                 InputProps={{
-                  startAdornment: <MdOutlineLock />,
+                  startAdornment: (
+                    <MdOutlineLock className="text-[#875473] text-xl mr-2" />
+                  ),
                 }}
                 sx={{
                   "& .MuiOutlinedInput-root": {
+                    height: "50px",
+                    color: "#fff",
+
+                    "& fieldset": {
+                      borderColor: "#fff",
+                    },
+
+                    "&:hover fieldset": {
+                      borderColor: "#a06a8d",
+                    },
+
                     "&.Mui-focused fieldset": {
-                      borderColor: "#2B7FFF", // Change border color on focus
+                      borderColor: "#875473",
                     },
                   },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#2B7FFF", // Change label color on focus (optional)
+
+                  "& .MuiInputLabel-root": {
+                    color: "#875473",
                   },
-                  height: "50px", // Set the height of the TextField
-                  "& .MuiInputBase-root": {
-                    height: "100%", // Ensure the input base fills the TextField height
+
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: "#875473",
+                  },
+
+                  "& input::placeholder": {
+                    color: "#fff",
+                    opacity: 0.5,
                   },
                 }}
               />
-
               <div className="flex items-center justify-between mt-2">
-                <div className="text-[#2B7FFF] font-semibold">
+                <div className="text-[#875473] font-semibold">
                   <FormControlLabel
                     control={<Checkbox name="rememberMe" color="primary" />}
                     label="Remember Me"
@@ -131,26 +170,30 @@ const SignIn = () => {
                     style={{
                       fontWeight: "bold",
                       textDecoration: "underline",
-                      color: "#2B7FFF",
+                      color: "#875473",
                     }}
                   >
                     Forgot Password?
                   </Link>
                 </div>
               </div>
-
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
-                style={{
-                  marginTop: "20px",
-                  backgroundColor: "#2B7FFF",
-                  padding: "8px",
-                  fontWeight: "semibold",
-                  borderRadius: "10px",
-                  fontSize: "16px",
+                sx={{
+                  px: 3,
+                  py: 1,
+                  background: "linear-gradient(to right, #6d1db9, #bd85f1)",
+                  borderRadius: "12px",
                   textTransform: "none",
+                  fontSize: "14px",
+                  boxShadow: "0 10px 40px rgba(109, 29, 185, 0.3)",
+                  "&:hover": {
+                    background: "linear-gradient(to right, #5b189b, #a66fd9)",
+                    transform: "scale(1.05)",
+                  },
+                  transition: "all 0.3s",
                 }}
               >
                 Sign In
