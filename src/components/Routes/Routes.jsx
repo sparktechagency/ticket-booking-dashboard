@@ -14,7 +14,6 @@ import TermsAndConditions from "../Dashboard/Settings/TermsAndConditions";
 import AboutUs from "../Dashboard/Settings/AboutUs";
 import PrivacyPolicy from "../Dashboard/Settings/PrivacyPolicy";
 import RevenueManagement from "../Dashboard/Artists";
-import Transaction from "../Dashboard/Transaction";
 import Support from "../Dashboard/Support";
 import AddAvatar from "../Dashboard/Settings/AddAvatar";
 import Reliability from "../Dashboard/Subscription";
@@ -22,6 +21,7 @@ import AdminControls from "../Dashboard/AdminControls";
 import PrivacyCompliance from "../Dashboard/PrivacyCompliance";
 import Settings from "../Dashboard/Settings";
 import Events from "../Dashboard/Events";
+import Orders from "../Dashboard/Orders";
 
 const router = createBrowserRouter([
   {
@@ -66,7 +66,7 @@ const router = createBrowserRouter([
           },
           {
             path: "orders",
-            element: <Transaction />,
+            element: <Orders />,
           },
           {
             path: "users",
