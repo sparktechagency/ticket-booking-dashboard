@@ -13,15 +13,15 @@ import Faq from "../Dashboard/Settings/Faq";
 import TermsAndConditions from "../Dashboard/Settings/TermsAndConditions";
 import AboutUs from "../Dashboard/Settings/AboutUs";
 import PrivacyPolicy from "../Dashboard/Settings/PrivacyPolicy";
-import RevenueManagement from "../Dashboard/RevenueManagement";
-import Transaction from "../Dashboard/Transaction";
+import RevenueManagement from "../Dashboard/Artists";
 import Support from "../Dashboard/Support";
 import AddAvatar from "../Dashboard/Settings/AddAvatar";
-import { GrowthRetention } from "../Dashboard/GrowthAndRetention";
-import Reliability from "../Dashboard/Subscription";
+import Reliability from "../Dashboard/Users";
 import AdminControls from "../Dashboard/AdminControls";
 import PrivacyCompliance from "../Dashboard/PrivacyCompliance";
 import Settings from "../Dashboard/Settings";
+import Events from "../Dashboard/Events";
+import Orders from "../Dashboard/Orders";
 
 const router = createBrowserRouter([
   {
@@ -57,33 +57,29 @@ const router = createBrowserRouter([
             element: <Dashboard />,
           },
           {
-            path: "growth-retention",
-            element: <GrowthRetention />,
+            path: "events",
+            element: <Events />,
           },
           {
-            path: "revenue-management",
+            path: "artists",
             element: <RevenueManagement />,
           },
           {
-            path: "transaction",
-            element: <Transaction />,
+            path: "orders",
+            element: <Orders />,
           },
           {
-            path: "reliabilities",
+            path: "users",
             element: <Reliability />,
           },
 
           {
-            path: "support",
+            path: "transactions",
             element: <Support />,
           },
           {
-            path: "admin-controls",
+            path: "content-management",
             element: <AdminControls />,
-          },
-          {
-            path: "privacy-compliance",
-            element: <PrivacyCompliance />,
           },
           {
             path: "settings",

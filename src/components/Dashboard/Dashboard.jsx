@@ -1,378 +1,238 @@
+import { useMemo, useState } from "react";
 import {
-  Box,
-  Card,
-  CardContent,
-  Select,
-  MenuItem,
-  FormControl,
-} from "@mui/material";
-import {
-  FaUsers,
-  FaUserPlus,
-  FaCalendar,
-  FaClock,
-  FaUserFriends,
-  FaChartBar,
-  FaBolt,
-  FaChartLine,
-} from "react-icons/fa";
-import {
+  ResponsiveContainer,
   BarChart,
   Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  ComposedChart,
+  Tooltip as RechartsTooltip,
 } from "recharts";
-import { useState } from "react";
-import { MetricCard } from "../UI/MetricCard";
 import {
-  allCalendarDensityData,
-  allFeatureUsageData,
-  allOnboardingData,
-  // allSessionData,
-  // allTimeToValueData,
-  allUserTypeData,
+  FaDollarSign,
+  FaArrowUp,
+  FaTicketAlt,
+  FaUsers,
+  FaCrown,
+  FaCalendarAlt,
+} from "react-icons/fa";
+import { MonthlyIncomeChart } from "../Chart/OverviewChart/MonthlyIncomeChart";
+import { TotalSalesChart } from "../Chart/OverviewChart/TotalSalesChart";
+import { FormControl, MenuItem, Select } from "@mui/material";
+import {
+  monthlyIncomeByYear,
+  monthlySalesByYear,
+  overviewData,
 } from "../../../public/data/overviewData";
-import GrowthVsLoyaltyChart from "../Chart/OverviewChart/GrowthVsLoyaltyChart";
-import FeatureUsageChart from "../Chart/OverviewChart/FeatureUsageChart";
-import SessionChart from "../Chart/OverviewChart/SessionChart";
-import OnboardingChart from "../Chart/OverviewChart/OnboardingChart";
-import CalendarAndFamilyChart from "../Chart/OverviewChart/Calendar&FamilyChart";
+import { StatCard } from "../UI/StatCard";
+import { RecentOrders } from "../UI/RecentOrders";
+import { ActiveEvents } from "../UI/ActiveEvents";
 
 export default function Dashboard() {
-  // Individual year filters for each chart
-  const [userTypeYear, setUserTypeYear] = useState("2025");
-  const [featureUsageYear, setFeatureUsageYear] = useState("2025");
-  const [onboardingYear, setOnboardingYear] = useState("2025");
-  // const [sessionYear, setSessionYear] = useState("2025");
-  const [calendarDensityYear, setCalendarDensityYear] = useState("2025");
-  // const [timeToValueYear, setTimeToValueYear] = useState("2025");
+  const [statsTimeFilter, setStatsTimeFilter] = useState("month");
+  const [selectedYearForIncome, setSelectedYearForIncome] = useState(2025);
+  const [selectedYearForSales, setSelectedYearForSales] = useState(2025);
 
-  const userTypeData = allUserTypeData[userTypeYear];
-  const featureUsageData = allFeatureUsageData[featureUsageYear];
-  const onboardingData = allOnboardingData[onboardingYear];
-  // const sessionData = allSessionData[sessionYear];
-  const calendarDensityData = allCalendarDensityData[calendarDensityYear];
-  // const timeToValueData = allTimeToValueData[timeToValueYear];
-
-  const COLORS = [
-    "#3b82f6",
-    "#60a5fa",
-    "#93c5fd",
-    "#dbeafe",
-    "#eff6ff",
-    "#bfdbfe",
+  /* ---------------- ORDERS ---------------- */
+  const orders = [
+    {
+      id: 1,
+      eventTitle: "Coldplay Live",
+      customerInfo: { name: "John Doe" },
+      total: 240,
+      createdAt: "2025-01-14",
+    },
+    {
+      id: 2,
+      eventTitle: "NBA Finals",
+      customerInfo: { name: "Sarah Miles" },
+      total: 420,
+      createdAt: "2025-01-13",
+    },
   ];
 
+  /* ---------------- EVENTS ---------------- */
+  const events = [
+    {
+      id: 1,
+      title: "Tomorrowland Festival",
+      date: "2025-12-28",
+      imageUrl: "https://images.unsplash.com/photo-1518972559570-6c24a8e9f6f8",
+      ticketCategories: [{ availableQuantity: 120 }],
+    },
+    {
+      id: 2,
+      title: "UFC Championship",
+      date: "2025-04-02",
+      imageUrl: "https://images.unsplash.com/photo-1521412644187-c49fa049e84d",
+      ticketCategories: [{ availableQuantity: 85 }],
+    },
+  ];
+
+  const activeEvents = events.filter(
+    (e) => new Date(e.date) > new Date()
+  ).length;
+
+  const menuItemStyle = {
+    fontSize: "14px",
+    "&:hover": {
+      backgroundColor: "rgba(189,133,241,0.15)",
+    },
+    "&.Mui-selected": {
+      backgroundColor: "rgba(189,133,241,0.25)",
+      "&:hover": {
+        backgroundColor: "rgba(189,133,241,0.35)",
+      },
+    },
+  };
+
+  const stats = useMemo(() => overviewData[statsTimeFilter], [statsTimeFilter]);
+
+  /* ---------------- RENDER ---------------- */
   return (
-    <div className="p-8">
-      {/* Top Row Metrics - Core Usage */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: "24px",
-          marginBottom: "32px",
-        }}
-      >
-        <MetricCard
-          title="Daily Active Users"
-          value="12,458"
-          change={5.2}
-          icon={FaUsers}
-          subtitle="DAU"
-        />
-        <MetricCard
-          title="Weekly Active Users"
-          value="32,145"
-          change={8.7}
-          icon={FaChartLine}
-          subtitle="WAU"
-        />
-        <MetricCard
-          title="Monthly Active Users"
-          value="48,392"
-          change={12.3}
-          icon={FaChartBar}
-          subtitle="MAU"
-        />
-        <MetricCard
-          title="Stickiness"
-          value="25.7%"
-          change={3.1}
-          icon={FaBolt}
-          subtitle="DAU/MAU Ratio"
-        />{" "}
-        <MetricCard
-          title="Active Families"
-          value="8,942"
-          change={7.4}
-          icon={FaUserFriends}
-          subtitle="Of 11,235 total"
-        />
-        <MetricCard
-          title="Members/Family"
-          value="4.3"
-          change={4.2}
-          icon={FaUsers}
-          subtitle="Average family size"
-        />
-      </div>
-
-      {/* Charts Row 1: New vs Returning Users & Feature Usage */}
-      <div className="grid gap-6 mb-6 [grid-template-columns:repeat(auto-fit,minmax(500px,1fr))]">
-        <div className="p-4 bg-white rounded-lg shadow-lg">
-          <div className="flex justify-between items-center mb-1">
-            <p style={{ margin: 0, fontSize: "1.25rem", fontWeight: 600 }}>
-              New vs Returning Users
+    <div className="p-8 bg-[#0a0d27]">
+      <div className="space-y-8">
+        {/* HEADER */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl text-white font-display">
+              Platform Overview
+            </h2>
+            <p className="text-sm text-[#99a1af]">
+              Performance{" "}
+              {statsTimeFilter === "today"
+                ? "Today"
+                : statsTimeFilter === "week"
+                ? "This Week"
+                : statsTimeFilter === "month"
+                ? "This Month"
+                : statsTimeFilter === "year"
+                ? "This Year"
+                : "All Time"}
             </p>
-            <FormControl sx={{ minWidth: 100 }} size="small">
-              <Select
-                value={userTypeYear}
-                onChange={(e) => setUserTypeYear(e.target.value)}
-                sx={{
-                  borderRadius: 2,
-                  background: "white",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "rgb(59, 130, 246)",
-                  },
-                }}
-              >
-                <MenuItem value="2023">2023</MenuItem>
-                <MenuItem value="2024">2024</MenuItem>
-                <MenuItem value="2025">2025</MenuItem>
-              </Select>
-            </FormControl>
           </div>
-          <p className="text-sm text-[#6b7280] mb-6">
-            Growth vs loyalty trends
-          </p>
-          <GrowthVsLoyaltyChart userTypeData={userTypeData} />
+
+          <FormControl
+            size="small"
+            sx={{
+              minWidth: 160,
+              position: "relative",
+            }}
+          >
+            <Select
+              value={statsTimeFilter}
+              onChange={(e) => setStatsTimeFilter(e.target.value)}
+              displayEmpty
+              IconComponent={() => null}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    backgroundColor: "#030a1d",
+                    borderRadius: "12px",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    color: "#fff",
+                  },
+                },
+              }}
+              sx={{
+                backgroundColor: "#030a1d",
+                borderRadius: "12px",
+                color: "#fff",
+                paddingRight: "36px",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(255,255,255,0.1)",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "rgba(255,255,255,0.2)",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#bd85f1",
+                },
+                "& .MuiSelect-select": {
+                  padding: "10px 14px",
+                  fontSize: "14px",
+                },
+              }}
+            >
+              <MenuItem value="today" sx={menuItemStyle}>
+                Today
+              </MenuItem>
+              <MenuItem value="week" sx={menuItemStyle}>
+                This Week
+              </MenuItem>
+              <MenuItem value="month" sx={menuItemStyle}>
+                This Month
+              </MenuItem>
+              <MenuItem value="year" sx={menuItemStyle}>
+                This Year
+              </MenuItem>
+              <MenuItem value="all" sx={menuItemStyle}>
+                All Time
+              </MenuItem>
+            </Select>
+
+            {/* Calendar Icon */}
+            <FaCalendarAlt className="absolute right-3 top-1/2 -translate-y-1/2 text-[#99a1af]" />
+          </FormControl>
         </div>
 
-        <div className="p-4 bg-white rounded-lg shadow-lg">
-          <div className="flex justify-between items-center mb-1">
-            <p style={{ margin: 0, fontSize: "1.25rem", fontWeight: 600 }}>
-              Feature Usage Rates
-            </p>
-            <FormControl sx={{ minWidth: 100 }} size="small">
-              <Select
-                value={featureUsageYear}
-                onChange={(e) => setFeatureUsageYear(e.target.value)}
-                sx={{
-                  borderRadius: 2,
-                  background: "white",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "rgb(59, 130, 246)",
-                  },
-                }}
-              >
-                <MenuItem value="2023">2023</MenuItem>
-                <MenuItem value="2024">2024</MenuItem>
-                <MenuItem value="2025">2025</MenuItem>
-              </Select>
-            </FormControl>
-          </div>
-          <p className="text-sm text-[#6b7280] mb-6">
-            Active users and session counts by feature
-          </p>
-          <FeatureUsageChart featureUsageData={featureUsageData} />
+        {/* STATS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard
+            icon={<FaDollarSign />}
+            value={`$${stats.revenue.toLocaleString()}`}
+            label="Revenue"
+            growth={stats.revenueGrowth}
+            color="#05df72"
+          />
+          <StatCard
+            icon={<FaTicketAlt />}
+            value={stats.ticketsSold.toLocaleString()}
+            label="Tickets Sold"
+            growth={stats.ticketGrowth}
+            color="#bd85f1"
+          />
+          <StatCard
+            icon={<FaUsers />}
+            value={stats.users.toLocaleString()}
+            label="Users"
+            color="#42A5F5"
+          />
+          <StatCard
+            icon={<FaCrown />}
+            value={stats.premiumMembers}
+            label="Premium Members"
+            color="#FFEE58"
+          />
         </div>
-      </div>
 
-      {/* Charts Row 2: Onboarding Funnel & Session Metrics */}
-      <div className="grid gap-6 mb-6 [grid-template-columns:repeat(auto-fit,minmax(500px,1fr))]">
-        <Card
-          elevation={2}
-          sx={{
-            borderRadius: 4,
-            background: "linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)",
-          }}
-        >
-          <div className="p-4 bg-white rounded-lg shadow-lg">
-            <div className="flex justify-between items-center mb-1">
-              <p style={{ margin: 0, fontSize: "1.25rem", fontWeight: 600 }}>
-                Onboarding Completion
-              </p>
-              <FormControl sx={{ minWidth: 100 }} size="small">
-                <Select
-                  value={onboardingYear}
-                  onChange={(e) => setOnboardingYear(e.target.value)}
-                  sx={{
-                    borderRadius: 2,
-                    background: "white",
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "rgb(59, 130, 246)",
-                    },
-                  }}
-                >
-                  <MenuItem value="2023">2023</MenuItem>
-                  <MenuItem value="2024">2024</MenuItem>
-                  <MenuItem value="2025">2025</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
-            <p className="text-sm text-[#6b7280] mb-6">
-              User progression and drop-off points
-            </p>
-            <OnboardingChart onboardingData={onboardingData} />
-          </div>
-        </Card>
+        {/* CHARTS */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <MonthlyIncomeChart
+            title="Monthly Income"
+            data={monthlyIncomeByYear[selectedYearForIncome]}
+            dataKey="income"
+            colorStart="#bd85f1"
+            colorEnd="#6d1db9"
+            selectedYear={selectedYearForIncome}
+            setSelectedYear={setSelectedYearForIncome}
+          />
+          <TotalSalesChart
+            title="Monthly Income"
+            data={monthlySalesByYear[selectedYearForSales]}
+            dataKey="sales"
+            colorStart="#4ade80"
+            colorEnd="#22c55e"
+            selectedYear={selectedYearForSales}
+            setSelectedYear={setSelectedYearForSales}
+          />
+        </div>
 
-        {/* <Card
-          elevation={2}
-          sx={{
-            borderRadius: 4,
-            background: "linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)",
-          }}
-        >
-          <div className="p-4 bg-white rounded-lg shadow-lg">
-            <div className="flex items-center justify-between mb-1">
-              <p style={{ margin: 0, fontSize: "1.25rem", fontWeight: 600 }}>
-                Session Metrics
-              </p>
-              <FormControl sx={{ minWidth: 100 }} size="small">
-                <Select
-                  value={sessionYear}
-                  onChange={(e) => setSessionYear(e.target.value)}
-                  sx={{
-                    borderRadius: 2,
-                    background: "white",
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "rgb(59, 130, 246)",
-                    },
-                  }}
-                >
-                  <MenuItem value="2023">2023</MenuItem>
-                  <MenuItem value="2024">2024</MenuItem>
-                  <MenuItem value="2025">2025</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
-            <p className="text-sm text-[#6b7280] mb-4">
-              Track session duration and frequency to measure user engagement
-            </p>
-            <SessionChart sessionData={sessionData} />
-          </div>
-        </Card> */}
-      </div>
-
-      {/* Charts Row 3: Calendar Density & Time to Value */}
-      <div className="flex gap-6">
-        <Card
-          elevation={2}
-          sx={{
-            flex: 1,
-            borderRadius: 4,
-          }}
-        >
-          <div className="p-4 bg-white rounded-lg shadow-lg">
-            <div className="flex items-center justify-between mb-1">
-              <p style={{ margin: 0, fontSize: "1.25rem", fontWeight: 600 }}>
-                Calendar Density & Family Growth
-              </p>
-              <FormControl sx={{ minWidth: 100 }} size="small">
-                <Select
-                  value={calendarDensityYear}
-                  onChange={(e) => setCalendarDensityYear(e.target.value)}
-                  sx={{
-                    borderRadius: 2,
-                    background: "white",
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "rgb(59, 130, 246)",
-                    },
-                  }}
-                >
-                  <MenuItem value="2023">2023</MenuItem>
-                  <MenuItem value="2024">2024</MenuItem>
-                  <MenuItem value="2025">2025</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
-            <p className="text-sm text-[#6b7280] mb-6">
-              Events per family and average members
-            </p>
-            <CalendarAndFamilyChart calendarDensityData={calendarDensityData} />
-          </div>
-        </Card>
-
-        {/* <Card
-          elevation={2}
-          sx={{
-            borderRadius: 4,
-            height: "100%",
-            background: "linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%)",
-          }}
-        >
-          <div className="p-4 bg-white rounded-lg shadow-lg">
-            <div className="flex items-center justify-between mb-1">
-              <p style={{ margin: 0, fontSize: "1.25rem", fontWeight: 600 }}>
-                Time to Value
-              </p>
-              <FormControl sx={{ minWidth: 100 }} size="small">
-                <Select
-                  value={timeToValueYear}
-                  onChange={(e) => setTimeToValueYear(e.target.value)}
-                  sx={{
-                    borderRadius: 2,
-                    background: "white",
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "rgb(59, 130, 246)",
-                    },
-                  }}
-                >
-                  <MenuItem value="2023">2023</MenuItem>
-                  <MenuItem value="2024">2024</MenuItem>
-                  <MenuItem value="2025">2025</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
-            <p className="text-sm text-[#6b7280] mb-6">
-              Median days from signup
-            </p>
-            <div className="flex flex-col gap-4 mt-2">
-              {timeToValueData.map((item, index) => (
-                <div key={item.metric}>
-                  <div className="flex justify-between mb-2">
-                    <p className="text-sm font-semibold">{item.metric}</p>
-                    <p className="text-sm text-[#3b82f6] font-bold">
-                      {item.days} days
-                    </p>
-                  </div>
-                  <div className="h-2 rounded-sm bg-[#e5e7eb] overflow-hidden">
-                    <div
-                      style={{
-                        height: "100%",
-                        width: `${((7 - item.days) / 7) * 100}%`,
-                        background: `linear-gradient(90deg, ${
-                          COLORS[index]
-                        } 0%, ${COLORS[index + 1] || COLORS[index]} 100%)`,
-                        transition: "width 0.3s ease",
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-8 p-4 rounded-lg border border-[#3B82F633] bg-[#3b82f619]">
-              <p className="text-sm text-[#1e40af] font-semibold">
-                💡 Lower is better - faster time to value means users see the
-                benefit sooner
-              </p>
-            </div>
-          </div>
-        </Card> */}
+        {/* ORDERS & EVENTS */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <RecentOrders orders={orders} />
+          <ActiveEvents events={events} activeEvents={activeEvents} />
+        </div>
       </div>
     </div>
   );
