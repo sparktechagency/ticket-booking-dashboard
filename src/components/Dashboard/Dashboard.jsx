@@ -1,13 +1,4 @@
-import { useMemo, useState } from "react";
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-} from "recharts";
+import { useState } from "react";
 import {
   FaDollarSign,
   FaArrowUp,
@@ -18,79 +9,53 @@ import {
 } from "react-icons/fa";
 import { MonthlyIncomeChart } from "../Chart/OverviewChart/MonthlyIncomeChart";
 import { TotalSalesChart } from "../Chart/OverviewChart/TotalSalesChart";
-import { FormControl, MenuItem, Select } from "@mui/material";
-import {
-  monthlyIncomeByYear,
-  monthlySalesByYear,
-  overviewData,
-} from "../../../public/data/overviewData";
+import { CircularProgress, FormControl, MenuItem, Select } from "@mui/material";
 import { StatCard } from "../UI/StatCard";
-import { RecentOrders } from "../UI/RecentOrders";
-import { ActiveEvents } from "../UI/ActiveEvents";
+import { useGetDashboardDataQuery } from "../../Redux/api/dashboardApi";
 
 export default function Dashboard() {
-  const [statsTimeFilter, setStatsTimeFilter] = useState("month");
-  const [selectedYearForIncome, setSelectedYearForIncome] = useState(2025);
-  const [selectedYearForSales, setSelectedYearForSales] = useState(2025);
+  // const [statsTimeFilter, setStatsTimeFilter] = useState("month");
+  const [selectedYearForIncome, setSelectedYearForIncome] = useState(2026);
+  const [selectedYearForSales, setSelectedYearForSales] = useState(2026);
 
-  /* ---------------- ORDERS ---------------- */
-  const orders = [
-    {
-      id: 1,
-      eventTitle: "Coldplay Live",
-      customerInfo: { name: "John Doe" },
-      total: 240,
-      createdAt: "2025-01-14",
-    },
-    {
-      id: 2,
-      eventTitle: "NBA Finals",
-      customerInfo: { name: "Sarah Miles" },
-      total: 420,
-      createdAt: "2025-01-13",
-    },
-  ];
+  const {
+    data: allDashboardData,
+    isLoading,
+    isError,
+  } = useGetDashboardDataQuery();
+  const dashboardData = allDashboardData?.data;
+  console.log(dashboardData);
 
-  /* ---------------- EVENTS ---------------- */
-  const events = [
-    {
-      id: 1,
-      title: "Tomorrowland Festival",
-      date: "2025-12-28",
-      imageUrl: "https://images.unsplash.com/photo-1518972559570-6c24a8e9f6f8",
-      ticketCategories: [{ availableQuantity: 120 }],
-    },
-    {
-      id: 2,
-      title: "UFC Championship",
-      date: "2025-04-02",
-      imageUrl: "https://images.unsplash.com/photo-1521412644187-c49fa049e84d",
-      ticketCategories: [{ availableQuantity: 85 }],
-    },
-  ];
+  // const menuItemStyle = {
+  //   fontSize: "14px",
+  //   "&:hover": {
+  //     backgroundColor: "rgba(189,133,241,0.15)",
+  //   },
+  //   "&.Mui-selected": {
+  //     backgroundColor: "rgba(189,133,241,0.25)",
+  //     "&:hover": {
+  //       backgroundColor: "rgba(189,133,241,0.35)",
+  //     },
+  //   },
+  // };
 
-  const activeEvents = events.filter(
-    (e) => new Date(e.date) > new Date()
-  ).length;
+  // const stats = useMemo(() => overviewData[statsTimeFilter], [statsTimeFilter]);
 
-  const menuItemStyle = {
-    fontSize: "14px",
-    "&:hover": {
-      backgroundColor: "rgba(189,133,241,0.15)",
-    },
-    "&.Mui-selected": {
-      backgroundColor: "rgba(189,133,241,0.25)",
-      "&:hover": {
-        backgroundColor: "rgba(189,133,241,0.35)",
-      },
-    },
-  };
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[92vh]">
+        <CircularProgress />
+      </div>
+    );
+  }
 
-  const stats = useMemo(() => overviewData[statsTimeFilter], [statsTimeFilter]);
+  if (isError) {
+    return <p>Something went wrong</p>;
+  }
 
   /* ---------------- RENDER ---------------- */
   return (
-    <div className="p-8 bg-[#0a0d27]">
+    <div className="p-8 bg-[#0a0d27] h-screen">
       <div className="space-y-8">
         {/* HEADER */}
         <div className="flex justify-between items-center">
@@ -98,7 +63,7 @@ export default function Dashboard() {
             <h2 className="text-xl text-white font-display">
               Platform Overview
             </h2>
-            <p className="text-sm text-[#99a1af]">
+            {/* <p className="text-sm text-[#99a1af]">
               Performance{" "}
               {statsTimeFilter === "today"
                 ? "Today"
@@ -109,10 +74,10 @@ export default function Dashboard() {
                 : statsTimeFilter === "year"
                 ? "This Year"
                 : "All Time"}
-            </p>
+            </p> */}
           </div>
 
-          <FormControl
+          {/* <FormControl
             size="small"
             sx={{
               minWidth: 160,
@@ -171,36 +136,33 @@ export default function Dashboard() {
               </MenuItem>
             </Select>
 
-            {/* Calendar Icon */}
             <FaCalendarAlt className="absolute right-3 top-1/2 -translate-y-1/2 text-[#99a1af]" />
-          </FormControl>
+          </FormControl> */}
         </div>
 
         {/* STATS GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard
             icon={<FaDollarSign />}
-            value={`$${stats.revenue.toLocaleString()}`}
+            value={`$${dashboardData?.summary?.revenue.toLocaleString()}`}
             label="Revenue"
-            growth={stats.revenueGrowth}
             color="#05df72"
           />
           <StatCard
             icon={<FaTicketAlt />}
-            value={stats.ticketsSold.toLocaleString()}
+            value={dashboardData?.summary?.ticketsSold.toLocaleString()}
             label="Tickets Sold"
-            growth={stats.ticketGrowth}
             color="#bd85f1"
           />
           <StatCard
             icon={<FaUsers />}
-            value={stats.users.toLocaleString()}
+            value={dashboardData?.summary?.users.toLocaleString()}
             label="Users"
             color="#42A5F5"
           />
           <StatCard
             icon={<FaCrown />}
-            value={stats.premiumMembers}
+            value={dashboardData?.summary?.premiumMembers}
             label="Premium Members"
             color="#FFEE58"
           />
@@ -210,8 +172,9 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <MonthlyIncomeChart
             title="Monthly Income"
-            data={monthlyIncomeByYear[selectedYearForIncome]}
-            dataKey="income"
+            // data={monthlyIncomeByYear[selectedYearForIncome]}
+            data={dashboardData?.charts?.monthlyRevenue}
+            dataKey="value"
             colorStart="#bd85f1"
             colorEnd="#6d1db9"
             selectedYear={selectedYearForIncome}
@@ -219,8 +182,9 @@ export default function Dashboard() {
           />
           <TotalSalesChart
             title="Monthly Income"
-            data={monthlySalesByYear[selectedYearForSales]}
-            dataKey="sales"
+            // data={monthlySalesByYear[selectedYearForSales]}
+            data={dashboardData?.charts?.monthlyTicketSales}
+            dataKey="value"
             colorStart="#4ade80"
             colorEnd="#22c55e"
             selectedYear={selectedYearForSales}
@@ -229,10 +193,10 @@ export default function Dashboard() {
         </div>
 
         {/* ORDERS & EVENTS */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <RecentOrders orders={orders} />
           <ActiveEvents events={events} activeEvents={activeEvents} />
-        </div>
+        </div> */}
       </div>
     </div>
   );

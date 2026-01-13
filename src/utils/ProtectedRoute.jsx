@@ -7,7 +7,7 @@ const ProtectedRoute = ({ children }) => {
   const token = sessionStorage.getItem("accessToken");
 
   useEffect(() => {
-    if (!token) {
+    if (!token || token == undefined) {
       toast.info("Please sign in to access this page.");
     }
   }, [token]);

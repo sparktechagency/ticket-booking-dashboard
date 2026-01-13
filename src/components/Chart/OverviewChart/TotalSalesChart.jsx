@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { FormControl, MenuItem, Select } from "@mui/material";
 import {
   Bar,
@@ -24,7 +25,7 @@ export function TotalSalesChart({
       <div className="flex justify-between mb-4">
         <h3 className="text-white text-lg">Total Sales</h3>
 
-        {setSelectedYear && (
+        {/* {setSelectedYear && (
           <FormControl size="small" sx={{ minWidth: 110 }}>
             <Select
               value={selectedYear}
@@ -52,14 +53,14 @@ export function TotalSalesChart({
                 },
               }}
             >
-              {[2023, 2024, 2025].map((year) => (
+              {[2025, 2026, 2027, 2028].map((year) => (
                 <MenuItem key={year} value={year}>
                   {year}
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
-        )}
+        )} */}
       </div>
 
       <ResponsiveContainer width="100%" height={280}>
@@ -73,7 +74,7 @@ export function TotalSalesChart({
           </defs>
 
           <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
-          <XAxis dataKey="name" tick={{ fill: "#99a1af" }} />
+          <XAxis dataKey="month" tick={{ fill: "#99a1af" }} />
           <YAxis tick={{ fill: "#99a1af" }} />
           <RechartsTooltip />
 
