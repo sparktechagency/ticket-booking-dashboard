@@ -2,26 +2,34 @@ import {
   TextField,
   Button,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Modal,
-  Box,
-  Typography,
+  CircularProgress,
 } from "@mui/material";
 import { FiHelpCircle } from "react-icons/fi";
 import { FaPlus, FaTrash, FaSave } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  useCreateFAQMutation,
+  useGetFaqDataQuery,
+} from "../../../../Redux/api/contentApi";
 
-export default function FAQ({ cmsContent, setCmsContent, textFieldStyles }) {
-  const [editingId, setEditingId] = useState(null);
+export default function FAQ({ textFieldStyles }) {
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
   const [newFaq, setNewFaq] = useState({ question: "", answer: "" });
-  const [faqToDelete, setFaqToDelete] = useState(null);
+  // const [faqToDelete, setFaqToDelete] = useState(null);
+
+  const {
+    data: allFaqData,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetFaqDataQuery();
+  const faqData = allFaqData?.data;
+  console.log(faqData);
+
+  const [createFaq] = useCreateFAQMutation();
 
   // Add FAQ modal handlers
   const handleOpenAddModal = () => {
@@ -29,31 +37,57 @@ export default function FAQ({ cmsContent, setCmsContent, textFieldStyles }) {
     setAddModalOpen(true);
   };
 
-  const handleSaveNewFaq = () => {
-    const faqWithId = { ...newFaq, id: `faq-${Date.now()}` };
-    setCmsContent({
-      ...cmsContent,
-      faqs: [...cmsContent.faqs, faqWithId],
-    });
-    toast.success("FAQ Added Succesfully!");
-    setAddModalOpen(false);
+  const handleSaveNewFaq = async () => {
+    // Validate input
+    if (!newFaq.question.trim() || !newFaq.answer.trim()) {
+      toast.error("Please fill in both question and answer");
+      return;
+    }
+
+    try {
+      // Call the create FAQ API
+      const response = await createFaq({
+        question: newFaq.question,
+        answer: newFaq.answer,
+      }).unwrap();
+
+      console.log(response);
+
+      if (response.success) {
+        toast.success("FAQ Added Successfully!");
+        refetch();
+        setAddModalOpen(false);
+        setNewFaq({ question: "", answer: "" });
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to add FAQ");
+      console.error("Error creating FAQ:", error);
+    }
   };
 
   // Delete FAQ modal handlers
-  const handleDeleteClick = (faq) => {
-    setFaqToDelete(faq);
-    setDeleteOpen(true);
-  };
+  // const handleDeleteClick = (faq) => {
+  //   setFaqToDelete(faq);
+  //   setDeleteOpen(true);
+  // };
 
-  const handleConfirmDelete = () => {
-    setCmsContent({
-      ...cmsContent,
-      faqs: cmsContent.faqs.filter((f) => f.id !== faqToDelete.id),
-    });
-    toast.success("FAQ deleted succesfully!");
-    setDeleteOpen(false);
-    setFaqToDelete(null);
-  };
+  // const handleConfirmDelete = () => {
+  //   toast.success("FAQ deleted succesfully!");
+  //   setDeleteOpen(false);
+  //   setFaqToDelete(null);
+  // };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[92vh]">
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return <p>Something went wrong</p>;
+  }
 
   return (
     <div className="space-y-6">
@@ -86,13 +120,13 @@ export default function FAQ({ cmsContent, setCmsContent, textFieldStyles }) {
         </div>
 
         {/* FAQ List */}
-        {cmsContent.faqs.length === 0 ? (
+        {faqData.length === 0 ? (
           <p className="text-[#99a1af] text-center py-12">
             No FAQs yet. Click “Add FAQ” to create one.
           </p>
         ) : (
           <div className="space-y-4">
-            {cmsContent.faqs.map((faq, index) => (
+            {faqData.map((faq, index) => (
               <div
                 key={faq.id}
                 className="p-4 bg-white/5 rounded-xl space-y-3 border border-white/10"
@@ -101,7 +135,7 @@ export default function FAQ({ cmsContent, setCmsContent, textFieldStyles }) {
                   <span className="text-[#bd85f1] text-sm font-semibold">
                     FAQ #{index + 1}
                   </span>
-                  <div className="flex items-center gap-2">
+                  {/* <div className="flex items-center gap-2">
                     {editingId === faq.id ? (
                       <Button
                         onClick={() => setEditingId(null)}
@@ -144,7 +178,7 @@ export default function FAQ({ cmsContent, setCmsContent, textFieldStyles }) {
                     >
                       <FaTrash />
                     </IconButton>
-                  </div>
+                  </div> */}
                 </div>
 
                 <div className="flex flex-col gap-3">
@@ -152,33 +186,22 @@ export default function FAQ({ cmsContent, setCmsContent, textFieldStyles }) {
                     fullWidth
                     label={`Question ${index + 1}`}
                     value={faq.question}
-                    disabled={editingId !== faq.id}
-                    onChange={(e) => {
-                      const updated = [...cmsContent.faqs];
-                      updated[index].question = e.target.value;
-                      setCmsContent({
-                        ...cmsContent,
-                        faqs: updated,
-                      });
-                    }}
                     sx={{
                       ...textFieldStyles,
-                      ...(editingId !== faq.id && {
-                        "& .MuiOutlinedInput-root": {
-                          ...textFieldStyles["& .MuiOutlinedInput-root"],
-                          "&.Mui-disabled": {
-                            "& fieldset": {
-                              borderColor: "rgba(255,255,255,0.05)",
-                            },
+                      "& .MuiOutlinedInput-root": {
+                        ...textFieldStyles["& .MuiOutlinedInput-root"],
+                        "&.Mui-disabled": {
+                          "& fieldset": {
+                            borderColor: "rgba(255,255,255,0.05)",
                           },
                         },
-                        "& .MuiInputLabel-root.Mui-disabled": {
-                          color: "#6b7280",
-                        },
-                        "& .MuiOutlinedInput-input.Mui-disabled": {
-                          WebkitTextFillColor: "#9ca3af",
-                        },
-                      }),
+                      },
+                      "& .MuiInputLabel-root.Mui-disabled": {
+                        color: "#6b7280",
+                      },
+                      "& .MuiOutlinedInput-input.Mui-disabled": {
+                        WebkitTextFillColor: "#9ca3af",
+                      },
                     }}
                   />
 
@@ -188,33 +211,22 @@ export default function FAQ({ cmsContent, setCmsContent, textFieldStyles }) {
                     rows={3}
                     label={`Answer ${index + 1}`}
                     value={faq.answer}
-                    disabled={editingId !== faq.id}
-                    onChange={(e) => {
-                      const updated = [...cmsContent.faqs];
-                      updated[index].answer = e.target.value;
-                      setCmsContent({
-                        ...cmsContent,
-                        faqs: updated,
-                      });
-                    }}
                     sx={{
                       ...textFieldStyles,
-                      ...(editingId !== faq.id && {
-                        "& .MuiOutlinedInput-root": {
-                          ...textFieldStyles["& .MuiOutlinedInput-root"],
-                          "&.Mui-disabled": {
-                            "& fieldset": {
-                              borderColor: "rgba(255,255,255,0.05)",
-                            },
+                      "& .MuiOutlinedInput-root": {
+                        ...textFieldStyles["& .MuiOutlinedInput-root"],
+                        "&.Mui-disabled": {
+                          "& fieldset": {
+                            borderColor: "rgba(255,255,255,0.05)",
                           },
                         },
-                        "& .MuiInputLabel-root.Mui-disabled": {
-                          color: "#6b7280",
-                        },
-                        "& .MuiOutlinedInput-input.Mui-disabled": {
-                          WebkitTextFillColor: "#9ca3af",
-                        },
-                      }),
+                      },
+                      "& .MuiInputLabel-root.Mui-disabled": {
+                        color: "#6b7280",
+                      },
+                      "& .MuiOutlinedInput-input.Mui-disabled": {
+                        WebkitTextFillColor: "#9ca3af",
+                      },
                     }}
                   />
                 </div>
@@ -281,59 +293,6 @@ export default function FAQ({ cmsContent, setCmsContent, textFieldStyles }) {
             >
               Save FAQ
             </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* ================= Delete Confirmation Modal ================= */}
-      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)}>
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 ">
-          <div className="bg-gradient-to-br from-[#421072] via-[#1c063b] to-[#271941] p-6 rounded-2xl w-full max-w-sm">
-            {/* Title */}
-            <p className="text-xl font-bold text-white mb-4">Delete FAQ</p>
-
-            {/* Content */}
-            <p className="text-sm text-[#99a1af] mb-6">
-              Are you sure you want to delete this FAQ? This action cannot be
-              undone.
-            </p>
-
-            {/* Actions */}
-            <div className="flex justify-end gap-3">
-              <Button
-                onClick={() => setDeleteOpen(false)}
-                variant="outlined"
-                sx={{
-                  textTransform: "none",
-                  color: "white",
-                  borderColor: "rgba(255,255,255,0.5)",
-                  borderRadius: "0.5rem",
-                  px: 4,
-                  py: 1,
-                  fontSize: "14px",
-                  "&:hover": { backgroundColor: "rgba(255,255,255,0.1)" },
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleConfirmDelete}
-                variant="outlined"
-                sx={{
-                  textTransform: "none",
-                  color: "#f87171",
-                  fontWeight: "bold",
-                  borderColor: "rgba(255,255,255,0.5)",
-                  borderRadius: "0.5rem",
-                  px: 4,
-                  py: 1,
-                  fontSize: "14px",
-                  "&:hover": { backgroundColor: "rgba(248,113,113,0.1)" },
-                }}
-              >
-                Delete
-              </Button>
-            </div>
           </div>
         </div>
       </Modal>
