@@ -14,6 +14,7 @@ import Support from "../Dashboard/Transactions";
 import Reliability from "../Dashboard/Users";
 import Events from "../Dashboard/Events";
 import Orders from "../Dashboard/Orders";
+import ProtectedRoute from "../../utils/ProtectedRoute";
 
 const router = createBrowserRouter([
   {
@@ -38,7 +39,11 @@ const router = createBrowserRouter([
       },
       {
         path: "",
-        element: <DashboardLayout />,
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        ),
         children: [
           {
             path: "/",

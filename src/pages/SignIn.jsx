@@ -10,41 +10,42 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineMailOpen } from "react-icons/hi";
 import { MdOutlineLock } from "react-icons/md";
-// import { useSignInMutation } from "../../Redux/api/authApi";
-// import { toast } from "sonner";
+import { toast } from "sonner";
+import { useLogInMutation } from "../Redux/api/authApi";
 
 const SignIn = () => {
   const navigate = useNavigate();
-  // const [login] = useSignInMutation();
+  const [login] = useLogInMutation();
 
   const onFinish = async (e) => {
     e.preventDefault();
     const form = new FormData(e.target);
 
-    const values = {
+    const data = {
       email: form.get("email"),
       password: form.get("password"),
     };
 
-    console.log("signIn Data", values);
-    navigate("/", { replace: true });
-    // try {
-    //   const res = await login(data).unwrap();
-    //   localStorage.setItem("accessToken", res?.data?.accessToken);
-    //   localStorage.setItem("refreshToken", res?.data?.refreshToken);
+    console.log("signIn Data", data);
+    // navigate("/", { replace: true });
+    try {
+      const res = await login(data).unwrap();
+      console.log(res);
+      sessionStorage.setItem("accessToken", res?.data?.token);
+      // sessionStorage.setItem("refreshToken", res?.data?.refreshToken);
 
-    //   if (res.success) {
-    //     toast.success("Login Successfully!");
-    //     navigate("/");
-    //   } else {
-    //     toast.error("Login Error.");
-    //   }
-    // } catch (error) {
-    //   console.error("Error user login:", error);
-    //   if (error.data) {
-    //     toast.error("Something went wrong while logging in.");
-    //   }
-    // }
+      if (res.success) {
+        toast.success("Login Successfully!");
+        navigate("/");
+      } else {
+        toast.error("Login Error.");
+      }
+    } catch (error) {
+      console.error("Error user login:", error);
+      if (error.data) {
+        toast.error("Something went wrong while logging in.");
+      }
+    }
   };
 
   return (
@@ -75,7 +76,7 @@ const SignIn = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <HiOutlineMailOpen size={20} color="#875473" />
+                      <HiOutlineMailOpen size={20} color="#ddaef8" />
                     </InputAdornment>
                   ),
                 }}
@@ -85,29 +86,29 @@ const SignIn = () => {
                     color: "#fff",
 
                     "& fieldset": {
-                      borderColor: "#fff",
+                      borderColor: "#cc9fe6",
                     },
 
                     "&:hover fieldset": {
-                      borderColor: "#a06a8d",
+                      borderColor: "#cc9fe6",
                     },
 
                     "&.Mui-focused fieldset": {
-                      borderColor: "#875473",
+                      borderColor: "#cc9fe6",
                     },
                   },
 
                   "& .MuiInputLabel-root": {
-                    color: "#875473",
+                    color: "#cc9fe6",
                   },
 
                   "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#875473",
+                    color: "#cc9fe6",
                   },
 
                   "& input::placeholder": {
-                    color: "#fff",
-                    opacity: 0.5,
+                    color: "#cc9fe6",
+                    opacity: 0.99,
                   },
                 }}
               />
@@ -122,7 +123,7 @@ const SignIn = () => {
                 placeholder="Enter your password"
                 InputProps={{
                   startAdornment: (
-                    <MdOutlineLock className="text-[#875473] text-xl mr-2" />
+                    <MdOutlineLock className="text-[#ddaef8] text-xl mr-2" />
                   ),
                 }}
                 sx={{
@@ -131,34 +132,34 @@ const SignIn = () => {
                     color: "#fff",
 
                     "& fieldset": {
-                      borderColor: "#fff",
+                      borderColor: "#cc9fe6",
                     },
 
                     "&:hover fieldset": {
-                      borderColor: "#a06a8d",
+                      borderColor: "#cc9fe6",
                     },
 
                     "&.Mui-focused fieldset": {
-                      borderColor: "#875473",
+                      borderColor: "#cc9fe6",
                     },
                   },
 
                   "& .MuiInputLabel-root": {
-                    color: "#875473",
+                    color: "#cc9fe6",
                   },
 
                   "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#875473",
+                    color: "#cc9fe6",
                   },
 
                   "& input::placeholder": {
-                    color: "#fff",
-                    opacity: 0.5,
+                    color: "#cc9fe6",
+                    opacity: 0.99,
                   },
                 }}
               />
               <div className="flex items-center justify-between mt-2">
-                <div className="text-[#875473] font-semibold">
+                <div className="text-[#cc9fe6] font-semibold">
                   <FormControlLabel
                     control={<Checkbox name="rememberMe" color="primary" />}
                     label="Remember Me"
@@ -168,9 +169,9 @@ const SignIn = () => {
                   <Link
                     to="/forgot-password"
                     style={{
-                      fontWeight: "bold",
+                      fontWeight: "600",
                       textDecoration: "underline",
-                      color: "#875473",
+                      color: "#cc9fe6",
                     }}
                   >
                     Forgot Password?
