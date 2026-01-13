@@ -25,7 +25,7 @@ export default function Sidebar() {
     <div className="bg-[#140f36] h-screen w-full shadow-2xl">
       <div className="flex flex-col items-center gap-4 py-5">
         <Link to="/" className="">
-          <img src={logo} alt="" className="w-20 h-8 mx-auto" />
+          <img src={logo} alt="" className="w-32 h-8 object-contain mx-auto" />
         </Link>
         <hr className="w-24 border border-[#E0E1E2]" />
       </div>
