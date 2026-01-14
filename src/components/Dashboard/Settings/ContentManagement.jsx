@@ -22,7 +22,7 @@ export function ContentManagement() {
   };
 
   const sections = [
-    { id: "contact", label: "Contact Page", icon: FiMail },
+    // { id: "contact", label: "Contact Page", icon: FiMail },
     { id: "faq", label: "FAQ Page", icon: FiHelpCircle },
     { id: "refund", label: "Refund Policy", icon: FaShield },
     { id: "privacy", label: "Privacy Policy", icon: FaFile },
@@ -125,13 +125,13 @@ export function ContentManagement() {
       </div>
 
       {/* Contact Page Section */}
-      {activeSection === "contact" && (
+      {/* {activeSection === "contact" && (
         <ContactInfo
           cmsContent={cmsContent}
           setCmsContent={setCmsContent}
           textFieldStyles={textFieldStyles}
         />
-      )}
+      )} */}
 
       {/* FAQ Section */}
       {activeSection === "faq" && (
