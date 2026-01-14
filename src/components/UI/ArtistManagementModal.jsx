@@ -1,14 +1,6 @@
+import { Button } from "@mui/material";
 import { useEffect, useState } from "react";
-import {
-  FaTimes,
-  FaSave,
-  FaUpload,
-  FaCheckCircle,
-  FaInstagram,
-  FaTwitter,
-  FaFacebook,
-  FaGlobe,
-} from "react-icons/fa";
+import { FaTimes, FaSave, FaUpload, FaCheckCircle } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
 import { toast } from "sonner";
 
@@ -113,6 +105,11 @@ export function ArtistManagementModal({ artist, isOpen, onClose, onSave }) {
     onSave(formData);
   };
 
+  const purpleFieldClass =
+    "w-full px-4 py-3 bg-[#030a1d] text-white rounded-xl border border-purple-500/30 " +
+    "focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/30 " +
+    "hover:border-purple-400/60 transition";
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
       <div className="w-full max-w-3xl max-h-[90vh] bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/90 border border-white/10 rounded-3xl overflow-hidden flex flex-col">
@@ -146,7 +143,7 @@ export function ArtistManagementModal({ artist, isOpen, onClose, onSave }) {
             </label>
 
             <div className="flex gap-4 flex-wrap">
-              <div className="w-48 h-48 bg-[#030a1d] border-2 border-dashed border-white/10 rounded-2xl overflow-hidden relative group">
+              <div className="w-48 h-48 bg-[#030a1d] border-2 border-dashed border-purple-500/30 rounded-2xl overflow-hidden relative group group-hover:border-purple-400/60 transition">
                 {imagePreview ? (
                   <img
                     src={imagePreview}
@@ -164,21 +161,7 @@ export function ArtistManagementModal({ artist, isOpen, onClose, onSave }) {
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setImagePreview(reader.result);
-                      setFormData((prev) => ({
-                        ...prev,
-                        imageUrl: reader.result,
-                        imageFile: file,
-                      }));
-                    };
-                    reader.readAsDataURL(file);
-                  }}
+                  onChange={handleImageUpload}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 />
 
@@ -227,7 +210,7 @@ export function ArtistManagementModal({ artist, isOpen, onClose, onSave }) {
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             placeholder="Artist name"
-            className="w-full px-4 py-3 bg-[#030a1d] border border-white/10 rounded-xl text-white"
+            className={purpleFieldClass}
           />
 
           {/* Genre */}
@@ -236,7 +219,7 @@ export function ArtistManagementModal({ artist, isOpen, onClose, onSave }) {
             onChange={(e) =>
               setFormData({ ...formData, genre: e.target.value })
             }
-            className="w-full px-4 py-3 bg-[#030a1d] border border-white/10 rounded-xl text-white"
+            className={purpleFieldClass}
           >
             <option value="">Select genre</option>
             {GENRE_OPTIONS.map((g) => (
@@ -250,91 +233,53 @@ export function ArtistManagementModal({ artist, isOpen, onClose, onSave }) {
             onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
             rows={4}
             placeholder="Artist bio"
-            className="w-full px-4 py-3 bg-[#030a1d] border border-white/10 rounded-xl text-white resize-none"
+            className={`${purpleFieldClass} resize-none`}
           />
-
-          {/* Social Links */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <SocialInput
-              icon={<FaInstagram />}
-              value={formData.socialLinks.instagram}
-              placeholder="@instagram"
-              onChange={(v) =>
-                setFormData({
-                  ...formData,
-                  socialLinks: { ...formData.socialLinks, instagram: v },
-                })
-              }
-            />
-            <SocialInput
-              icon={<FaTwitter />}
-              value={formData.socialLinks.twitter}
-              placeholder="@twitter"
-              onChange={(v) =>
-                setFormData({
-                  ...formData,
-                  socialLinks: { ...formData.socialLinks, twitter: v },
-                })
-              }
-            />
-            <SocialInput
-              icon={<FaFacebook />}
-              value={formData.socialLinks.facebook}
-              placeholder="facebook.com"
-              onChange={(v) =>
-                setFormData({
-                  ...formData,
-                  socialLinks: { ...formData.socialLinks, facebook: v },
-                })
-              }
-            />
-            <SocialInput
-              icon={<FaGlobe />}
-              value={formData.socialLinks.website}
-              placeholder="website"
-              onChange={(v) =>
-                setFormData({
-                  ...formData,
-                  socialLinks: { ...formData.socialLinks, website: v },
-                })
-              }
-            />
-          </div>
         </div>
 
         {/* Footer */}
         <div className="p-6 border-t border-white/10 flex justify-between">
-          <button
+          <Button
+            sx={{
+              textTransform: "none",
+              px: 3,
+              py: 1,
+              backgroundColor: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "white",
+              borderRadius: "12px",
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.1)",
+              },
+            }}
             onClick={onClose}
-            className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-white cursor-pointer"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
+            sx={{
+              textTransform: "none",
+              px: 3,
+              py: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              background: "linear-gradient(to right, #6d1db9, #bd85f1)",
+              color: "white",
+              borderRadius: "12px",
+              cursor: "pointer",
+              "&:hover": {
+                background: "linear-gradient(to right, #5b189b, #a66fd9)",
+              },
+            }}
             onClick={handleSave}
-            className="px-6 py-3 bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] rounded-xl text-white flex items-center gap-2 cursor-pointer"
           >
             <FaSave />
             {artist ? "Update Artist" : "Create Artist"}
-          </button>
+          </Button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function SocialInput({ icon, value, placeholder, onChange }) {
-  return (
-    <div className="relative">
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#99a1af]">
-        {icon}
-      </span>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full pl-10 pr-4 py-3 bg-[#030a1d] border border-white/10 rounded-xl text-white"
-      />
     </div>
   );
 }

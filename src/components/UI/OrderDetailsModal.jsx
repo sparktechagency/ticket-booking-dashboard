@@ -250,46 +250,6 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
             </Stack>
           </Stack>
         </Paper>
-
-        {/* Action Buttons */}
-        <Stack direction="row" spacing={2}>
-          <Button
-            variant="outlined"
-            sx={{
-              flex: 1,
-              textTransform: "none",
-              height: "50px",
-              color: "white",
-              borderColor: "rgba(255,255,255,0.1)",
-              borderRadius: "10px",
-              "&:hover": {
-                borderColor: "#bd85f1",
-                backgroundColor: "rgba(255,255,255,0.05)",
-              },
-            }}
-            startIcon={<FaDownload />}
-          >
-            Download Invoice
-          </Button>
-          <Button
-            variant="outlined"
-            sx={{
-              flex: 1,
-              textTransform: "none",
-              height: "50px",
-              borderRadius: "10px",
-              borderColor: "rgba(255,255,255,0.1)",
-              color: "white",
-              "&:hover": {
-                borderColor: "#bd85f1",
-                backgroundColor: "rgba(255,255,255,0.05)",
-              },
-            }}
-            startIcon={<FiPrinter />}
-          >
-            Print Receipt
-          </Button>
-        </Stack>
       </Paper>
     </Modal>
   );

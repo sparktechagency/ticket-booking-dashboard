@@ -15,18 +15,7 @@ import {
   MenuItem,
   FormControl,
 } from "@mui/material";
-import {
-  FaArrowTrendUp,
-  FaArrowTrendDown,
-  FaDollarSign,
-  FaArrowRotateRight,
-  FaFilter,
-  FaArrowUpRightFromSquare,
-  FaArrowDownLong,
-  FaCreditCard,
-  FaBuilding,
-  FaWallet,
-} from "react-icons/fa6";
+import { FaFilter } from "react-icons/fa6";
 
 const mockTransactions = [
   {
@@ -127,66 +116,13 @@ export default function Transactions() {
   const [transactions] = useState(mockTransactions);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [showRefundModal, setShowRefundModal] = useState(false);
   const [filterType, setFilterType] = useState("all");
-  const [refundData, setRefundData] = useState({
-    orderId: "",
-    amount: "",
-    reason: "",
-  });
 
   // Filter transactions based on type
   const filteredTransactions = transactions.filter((transaction) => {
     if (filterType === "all") return true;
-    return transaction.type === filterType;
+    return transaction.status === filterType;
   });
-
-  // Calculate balance based on filtered transactions
-  const totalBalance = filteredTransactions
-    .filter((t) => t.status === "completed")
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const pendingAmount = filteredTransactions
-    .filter((t) => t.status === "pending")
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-
-  const totalIncome = filteredTransactions
-    .filter((t) => t.type === "income" && t.status === "completed")
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const totalRefunds = filteredTransactions
-    .filter((t) => t.type === "refund" && t.status === "completed")
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-
-  const getTransactionIcon = (type) => {
-    switch (type) {
-      case "income":
-        return <FaArrowDownLong className="w-4 h-4" />;
-      case "refund":
-        return <FaArrowUpRightFromSquare className="w-4 h-4" />;
-      case "payout":
-        return <FaBuilding className="w-4 h-4" />;
-      case "fee":
-        return <FaCreditCard className="w-4 h-4" />;
-      default:
-        return null;
-    }
-  };
-
-  const getTransactionColor = (type) => {
-    switch (type) {
-      case "income":
-        return "text-green-400 bg-green-400/10";
-      case "refund":
-        return "text-red-400 bg-red-400/10";
-      case "payout":
-        return "text-blue-400 bg-blue-400/10";
-      case "fee":
-        return "text-yellow-400 bg-yellow-400/10";
-      default:
-        return "";
-    }
-  };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -197,13 +133,6 @@ export default function Transactions() {
     setPage(0);
   };
 
-  const handleRefundSubmit = () => {
-    // Handle refund logic here
-    console.log("Refund Data:", refundData);
-    setShowRefundModal(false);
-    setRefundData({ orderId: "", amount: "", reason: "" });
-  };
-
   const paginatedTransactions = filteredTransactions.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
@@ -211,66 +140,8 @@ export default function Transactions() {
 
   return (
     <div className="space-y-6 min-h-screen bg-[#0a0d27] p-6">
-      {/* Balance Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Available Balance */}
-        <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6 hover:border-[#bd85f1]/30 transition-all">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#bd85f1]/20 to-[#6d1db9]/10 rounded-2xl flex items-center justify-center">
-              <FaWallet className="w-6 h-6 text-[#bd85f1]" />
-            </div>
-          </div>
-          <p className="text-3xl text-white font-display mb-1">
-            ${totalBalance.toLocaleString()}
-          </p>
-          <p className="text-sm text-[#99a1af] font-sans">Available Balance</p>
-        </div>
-
-        {/* Pending Amount */}
-        <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6 hover:border-[#bd85f1]/30 transition-all">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-yellow-500/20 to-yellow-600/10 rounded-2xl flex items-center justify-center">
-              <FaArrowRotateRight className="w-6 h-6 text-yellow-400" />
-            </div>
-          </div>
-          <p className="text-3xl text-white font-display mb-1">
-            ${pendingAmount.toLocaleString()}
-          </p>
-          <p className="text-sm text-[#99a1af] font-sans">Pending</p>
-        </div>
-
-        {/* Total Income */}
-        <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6 hover:border-[#bd85f1]/30 transition-all">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-green-500/20 to-green-600/10 rounded-2xl flex items-center justify-center">
-              <FaArrowTrendUp className="w-6 h-6 text-green-400" />
-            </div>
-          </div>
-          <p className="text-3xl text-white font-display mb-1">
-            ${totalIncome.toLocaleString()}
-          </p>
-          <p className="text-sm text-[#99a1af] font-sans">Total Income</p>
-        </div>
-
-        {/* Total Refunds */}
-        <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6 hover:border-[#bd85f1]/30 transition-all">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-red-500/20 to-red-600/10 rounded-2xl flex items-center justify-center">
-              <FaArrowTrendDown className="w-6 h-6 text-red-400" />
-            </div>
-          </div>
-          <p className="text-3xl text-white font-display mb-1">
-            ${totalRefunds.toLocaleString()}
-          </p>
-          <p className="text-sm text-[#99a1af] font-sans">Total Refunds</p>
-        </div>
-      </div>
-
       {/* Action Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h2 className="text-2xl text-white font-display">
-          Transaction History
-        </h2>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-end gap-4">
         <div className="flex gap-3">
           {/* Filter Dropdown */}
           <div className="relative">
@@ -307,29 +178,13 @@ export default function Transactions() {
                   },
                 }}
               >
-                <MenuItem value="all">All Types</MenuItem>
-                <MenuItem value="income">Income Only</MenuItem>
-                <MenuItem value="refund">Refunds Only</MenuItem>
-                <MenuItem value="payout">Payouts Only</MenuItem>
-                <MenuItem value="fee">Fees Only</MenuItem>
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
               </Select>
             </FormControl>
             <FaFilter className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           </div>
-
-          <Button
-            sx={{
-              textTransform: "none",
-              color: "white",
-              borderRadius: "15px",
-              px: 3,
-            }}
-            onClick={() => setShowRefundModal(true)}
-            className="bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] hover:from-[#5b189b] hover:to-[#a66fd9] text-white rounded-xl font-display transition-all hover:scale-105 flex items-center gap-2 shadow-lg shadow-[#6d1db9]/30"
-          >
-            <FaArrowRotateRight className="w-4 h-4" />
-            Issue Refund
-          </Button>
         </div>
       </div>
 
@@ -354,7 +209,7 @@ export default function Transactions() {
             >
               {[
                 "Transaction ID",
-                "Type",
+
                 "Description",
                 "Date",
                 "Status",
@@ -390,19 +245,6 @@ export default function Transactions() {
               >
                 <TableCell sx={{ padding: "16px 24px", color: "white" }}>
                   #{transaction.id}
-                </TableCell>
-
-                <TableCell sx={{ padding: "16px 24px" }}>
-                  <div
-                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg ${getTransactionColor(
-                      transaction.type
-                    )}`}
-                  >
-                    {getTransactionIcon(transaction.type)}
-                    <span className="text-xs font-sans capitalize">
-                      {transaction.type}
-                    </span>
-                  </div>
                 </TableCell>
 
                 <TableCell sx={{ padding: "16px 24px" }}>
@@ -472,152 +314,6 @@ export default function Transactions() {
           }}
         />
       </TableContainer>
-
-      {/* Refund Modal */}
-      <Modal
-        open={showRefundModal}
-        onClose={() => setShowRefundModal(false)}
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div className="bg-[#080014] border border-white/10 rounded-3xl p-8 max-w-md w-full mx-4">
-          <h3 className="text-2xl text-white font-display mb-6">
-            Issue Refund
-          </h3>
-          <div className="space-y-4">
-            <div className="flex flex-col gap-4">
-              <TextField
-                fullWidth
-                label="Order ID"
-                placeholder="Enter order ID"
-                value={refundData.orderId}
-                onChange={(e) =>
-                  setRefundData({ ...refundData, orderId: e.target.value })
-                }
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    backgroundColor: "#030a1d",
-                    borderRadius: "12px",
-                    color: "white",
-                    "& fieldset": {
-                      borderColor: "rgba(255,255,255,0.1)",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "rgba(189,133,241,0.5)",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#bd85f1",
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: "#99a1af",
-                  },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#bd85f1",
-                  },
-                }}
-              />
-
-              <TextField
-                fullWidth
-                type="number"
-                label="Refund Amount"
-                placeholder="0.00"
-                value={refundData.amount}
-                onChange={(e) =>
-                  setRefundData({ ...refundData, amount: e.target.value })
-                }
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    backgroundColor: "#030a1d",
-                    borderRadius: "12px",
-                    color: "white",
-                    "& fieldset": {
-                      borderColor: "rgba(255,255,255,0.1)",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "rgba(189,133,241,0.5)",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#bd85f1",
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: "#99a1af",
-                  },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#bd85f1",
-                  },
-                }}
-              />
-
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                label="Reason"
-                placeholder="Reason for refund"
-                value={refundData.reason}
-                onChange={(e) =>
-                  setRefundData({ ...refundData, reason: e.target.value })
-                }
-                sx={{
-                  "& .MuiOutlinedInput-root": {
-                    backgroundColor: "#030a1d",
-                    borderRadius: "12px",
-                    color: "white",
-                    "& fieldset": {
-                      borderColor: "rgba(255,255,255,0.1)",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "rgba(189,133,241,0.5)",
-                    },
-                    "&.Mui-focused fieldset": {
-                      borderColor: "#bd85f1",
-                    },
-                  },
-                  "& .MuiInputLabel-root": {
-                    color: "#99a1af",
-                  },
-                  "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#bd85f1",
-                  },
-                }}
-              />
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                sx={{
-                  textTransform: "none",
-                  color: "white",
-                  borderRadius: "15px",
-                  px: 3,
-                }}
-                onClick={() => setShowRefundModal(false)}
-                className="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-sans transition-all"
-              >
-                Cancel
-              </Button>
-              <Button
-                sx={{
-                  textTransform: "none",
-                  color: "white",
-                  borderRadius: "15px",
-                  px: 3,
-                }}
-                onClick={handleRefundSubmit}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] hover:from-[#5b189b] hover:to-[#a66fd9] text-white rounded-xl font-display transition-all"
-              >
-                Process Refund
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }

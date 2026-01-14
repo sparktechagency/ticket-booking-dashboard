@@ -87,6 +87,7 @@ export function EventManagementModal({
     location: event?.location || "",
     category: event?.category || "concert",
     imageUrl: event?.imageUrl || "",
+    teams: [],
     imageFile: undefined,
     seatingChartUrl: event?.seatingChartUrl || "",
     seatingChartFile: undefined,
@@ -154,6 +155,18 @@ export function EventManagementModal({
     }
   };
 
+  const handleTeamChange = (index, value) => {
+    setFormData((prev) => {
+      const updatedTeams = [...(prev.teams || [])];
+      updatedTeams[index] = value;
+
+      return {
+        ...prev,
+        teams: updatedTeams,
+      };
+    });
+  };
+
   const addTicketCategory = () => {
     const newCat = {
       id: `cat-${Date.now()}`,
@@ -192,7 +205,6 @@ export function EventManagementModal({
   const handleSave = () => {
     if (
       !formData.title ||
-      !formData.artistId ||
       !formData.date ||
       !formData.venue ||
       !formData.city
@@ -213,6 +225,20 @@ export function EventManagementModal({
         return;
       }
     }
+
+    if (formData.category === "concert" && !formData.artistId) {
+      toast.warning("Please select an artist.");
+      return;
+    }
+
+    if (
+      formData.category === "sports" &&
+      (!formData.teams || formData.teams.length !== 2)
+    ) {
+      toast.warning("Please select both teams.");
+      return;
+    }
+
     onSave(formData);
     onClose();
   };
@@ -236,8 +262,7 @@ export function EventManagementModal({
             width: "90%",
             maxWidth: "900px",
             maxHeight: "90vh",
-            background:
-              "linear-gradient(to bottom right, rgba(125, 80, 200, 0.35), rgba(40, 25, 70, 0.9), rgba(55, 55, 90, 0.95))",
+            bgcolor: "#080014",
             color: "white",
             borderRadius: "16px",
             overflow: "hidden",
@@ -338,6 +363,7 @@ export function EventManagementModal({
                 formData={formData}
                 setFormData={setFormData}
                 handleArtistChange={handleArtistChange}
+                handleTeamChange={handleTeamChange}
                 artists={artists}
               />
             )}

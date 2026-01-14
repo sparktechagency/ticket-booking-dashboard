@@ -195,7 +195,9 @@ export default function Events() {
                       {event.title}
                     </h3>
                     <p className="text-[#bd85f1] font-sans mb-2">
-                      {event.artist}
+                      {event.category === "concert"
+                        ? event.artist
+                        : event.teams?.join(" vs ")}
                     </p>
                   </div>
                   <span
