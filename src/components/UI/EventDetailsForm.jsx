@@ -1,6 +1,51 @@
-import { FormControl, InputAdornment, InputLabel, MenuItem, Select, TextField } from "@mui/material";
+import {
+  FormControl,
+  InputAdornment,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
 import React from "react";
-import { MdAccessTime, MdCalendarToday, MdImage, MdLocationOn, MdMap } from "react-icons/md";
+import {
+  MdAccessTime,
+  MdCalendarToday,
+  MdImage,
+  MdLocationOn,
+  MdMap,
+} from "react-icons/md";
+
+const outlinedFieldSx = {
+  bgcolor: "#030a1d",
+  color: "white",
+  borderRadius: "10px",
+
+  "& .MuiOutlinedInput-notchedOutline": {
+    borderColor: "rgba(189,133,241,0.35)", // soft purple
+  },
+
+  "&:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "rgba(189,133,241,0.3)",
+  },
+
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "rgba(189,133,241,0.3) ",
+    borderWidth: "2px",
+  },
+
+  "& .MuiInputBase-input": {
+    color: "white",
+  },
+};
+
+const outlinedLabelSx = {
+  color: "#99a1af",
+  "&.Mui-focused": {
+    color: "#bd85f1",
+  },
+  backgroundColor: "#030a1d",
+  px: 0.5,
+};
 
 export default function EventDetailsForm({
   imagePreview,
@@ -10,6 +55,7 @@ export default function EventDetailsForm({
   formData,
   setFormData,
   handleArtistChange,
+  handleTeamChange,
   artists,
 }) {
   return (
@@ -226,31 +272,19 @@ export default function EventDetailsForm({
               title: e.target.value,
             }))
           }
-          variant="outlined"
-          InputProps={{ sx: { bgcolor: "#030a1d", color: "white" } }}
-          InputLabelProps={{ sx: { color: "#99a1af" } }}
+          sx={outlinedFieldSx}
+          InputLabelProps={{ sx: outlinedLabelSx }}
         />
-
-        <FormControl fullWidth>
-          <InputLabel sx={{ color: "#99a1af" }}>Artist/Performer *</InputLabel>
-          <Select
-            value={formData.artistId}
-            onChange={(e) => handleArtistChange(e.target.value)}
-            sx={{ bgcolor: "#030a1d", color: "white" }}
-          >
-            <MenuItem value="">Select an artist...</MenuItem>
-            {artists?.map((artist) => (
-              <MenuItem key={artist.id} value={artist.id}>
-                {artist.name} - {artist.genre}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
 
         <div style={{ display: "flex", gap: "16px" }}>
           <FormControl fullWidth>
-            <InputLabel sx={{ color: "#99a1af" }}>Category</InputLabel>
+            <InputLabel id="category-label" sx={outlinedLabelSx}>
+              Category
+            </InputLabel>
+
             <Select
+              labelId="category-label"
+              label="Category"
               value={formData.category}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -258,7 +292,7 @@ export default function EventDetailsForm({
                   category: e.target.value,
                 }))
               }
-              sx={{ bgcolor: "#030a1d", color: "white" }}
+              sx={outlinedFieldSx}
             >
               <MenuItem value="concert">Concert</MenuItem>
               <MenuItem value="sports">Sports</MenuItem>
@@ -279,7 +313,7 @@ export default function EventDetailsForm({
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <MdCalendarToday />
+                  <MdCalendarToday className="text-[#efc6ff]" />
                 </InputAdornment>
               ),
               sx: { bgcolor: "#030a1d", color: "white" },
@@ -304,7 +338,7 @@ export default function EventDetailsForm({
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <MdAccessTime />
+                  <MdAccessTime className="text-[#efc6ff]" />
                 </InputAdornment>
               ),
               sx: { bgcolor: "#030a1d", color: "white" },
@@ -315,6 +349,64 @@ export default function EventDetailsForm({
             }}
           />
         </div>
+
+        {/* Concert */}
+        {formData.category === "concert" && (
+          <FormControl fullWidth>
+            <InputLabel sx={{ color: "#99a1af" }}>
+              Artist / Performer *
+            </InputLabel>
+            <Select
+              value={formData.artistId}
+              onChange={(e) => handleArtistChange(e.target.value)}
+              sx={outlinedFieldSx}
+            >
+              <MenuItem value="">Select an artist...</MenuItem>
+              {artists?.map((artist) => (
+                <MenuItem key={artist.id} value={artist.id}>
+                  {artist.name} - {artist.genre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+
+        {/* Sports */}
+        {formData.category === "sports" && (
+          <div style={{ display: "flex", gap: "16px" }}>
+            <FormControl fullWidth>
+              <InputLabel sx={{ color: "#99a1af" }}>Team A *</InputLabel>
+              <Select
+                value={formData.teams?.[0] || ""}
+                onChange={(e) => handleTeamChange(0, e.target.value)}
+                sx={outlinedFieldSx}
+              >
+                <MenuItem value="">Select Team A</MenuItem>
+                {artists?.map((team) => (
+                  <MenuItem key={team.id} value={team.name}>
+                    {team.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth>
+              <InputLabel sx={{ color: "#99a1af" }}>Team B *</InputLabel>
+              <Select
+                value={formData.teams?.[1] || ""}
+                onChange={(e) => handleTeamChange(1, e.target.value)}
+                sx={outlinedFieldSx}
+              >
+                <MenuItem value="">Select Team B</MenuItem>
+                {artists?.map((team) => (
+                  <MenuItem key={team.id} value={team.name}>
+                    {team.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </div>
+        )}
 
         <TextField
           fullWidth
@@ -340,7 +432,7 @@ export default function EventDetailsForm({
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <MdLocationOn />
+                <MdLocationOn className="text-[#efc6ff]" />
               </InputAdornment>
             ),
             sx: { bgcolor: "#030a1d", color: "white" },

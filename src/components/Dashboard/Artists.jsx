@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { TablePagination } from "@mui/material";
+import { Button, TablePagination } from "@mui/material";
 import {
   FaEdit,
   FaTrash,
@@ -12,13 +12,14 @@ import {
 
 import { ArtistManagementModal } from "../UI/ArtistManagementModal";
 import { artistsData } from "../../../public/data/artistData";
+import { DeleteConfirmationModal } from "../UI/DeleteConfirmationModal";
 
 export default function Artists() {
   const [artists, setArtists] = useState(artistsData);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
   const [artistModalOpen, setArtistModalOpen] = useState(false);
   const [editingArtist, setEditingArtist] = useState(null);
 
@@ -32,9 +33,13 @@ export default function Artists() {
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
+  const confirmDelete = (artist) => {
+    setDeleteTarget(artist);
+  };
 
-  const handleDelete = (id) => {
-    setArtists((prev) => prev.filter((a) => a.id !== id));
+  const handleDeleteConfirmed = () => {
+    setArtists((prev) => prev.filter((a) => a.id !== deleteTarget.id));
+    setDeleteTarget(null);
   };
 
   return (
@@ -51,23 +56,30 @@ export default function Artists() {
           />
         </div>
 
-        <div className="flex gap-3">
-          <button className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white flex items-center gap-2 cursor-pointer">
-            <FaFilter />
-            Filter
-          </button>
-
-          <button
-            onClick={() => {
-              setEditingArtist(null);
-              setArtistModalOpen(true);
-            }}
-            className="px-6 py-3 bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] text-white rounded-xl flex items-center gap-2 cursor-pointer"
-          >
-            <FaPlus />
-            Add Artist
-          </button>
-        </div>
+        <Button
+          sx={{
+            textTransform: "none",
+            px: 2,
+            py: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            background: "linear-gradient(to right, #6d1db9, #bd85f1)",
+            color: "white",
+            borderRadius: "12px",
+            cursor: "pointer",
+            "&:hover": {
+              background: "linear-gradient(to right, #5b189b, #a66fd9)",
+            },
+          }}
+          onClick={() => {
+            setEditingArtist(null);
+            setArtistModalOpen(true);
+          }}
+        >
+          <FaPlus />
+          Add Artist
+        </Button>
       </div>
 
       {/* Artists List */}
@@ -99,10 +111,6 @@ export default function Artists() {
                     <FaTicketAlt />
                     {artist.upcomingEvents?.length || 0} Events
                   </span>
-                  <span className="flex items-center gap-2">
-                    <FaStar />
-                    Popularity: {artist.popularity}%
-                  </span>
                 </div>
               </div>
 
@@ -119,7 +127,7 @@ export default function Artists() {
                 </button>
 
                 <button
-                  onClick={() => handleDelete(artist.id)}
+                  onClick={() => confirmDelete(artist)}
                   className="px-4 py-2 bg-red-500/10 text-red-400 rounded-xl flex items-center gap-2 cursor-pointer"
                 >
                   <FaTrash />
@@ -172,6 +180,21 @@ export default function Artists() {
           setArtistModalOpen(false);
           setEditingArtist(null);
         }}
+      />
+
+      {/* delete confirmation modal */}
+      <DeleteConfirmationModal
+        open={Boolean(deleteTarget)}
+        title="Delete Artist"
+        description={
+          <>
+            Are you sure you want to delete{" "}
+            <strong style={{ color: "white" }}>{deleteTarget?.name}</strong>?
+            This action cannot be undone.
+          </>
+        }
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDeleteConfirmed}
       />
     </div>
   );
