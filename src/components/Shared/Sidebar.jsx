@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { MdOutlineDashboard } from "react-icons/md";
 import { FiUsers, FiChevronDown, FiChevronUp } from "react-icons/fi";
-import { FaTicketAlt, FaMusic, FaDollarSign, FaUser, FaUsers } from "react-icons/fa";
+import {
+  FaTicketAlt,
+  FaMusic,
+  FaDollarSign,
+  FaUser,
+  FaUsers,
+} from "react-icons/fa";
 import { FaArrowTrendUp } from "react-icons/fa6";
 import { IoSettingsOutline } from "react-icons/io5";
 import { MdContentPaste } from "react-icons/md";
@@ -56,11 +62,11 @@ export default function Sidebar() {
             icon: <FaDollarSign fontSize={18} />,
             label: "Orders",
           },
-          {
-            to: "/users",
-            icon: <FiUsers fontSize={18} />,
-            label: "Users",
-          },
+          // {
+          //   to: "/users",
+          //   icon: <FiUsers fontSize={18} />,
+          //   label: "Users",
+          // },
           {
             to: "/transactions",
             icon: <FaArrowTrendUp fontSize={18} />,

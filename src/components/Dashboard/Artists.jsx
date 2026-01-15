@@ -11,8 +11,80 @@ import {
   useCreateArtistMutation,
   useUpdateArtistMutation,
   useDeleteArtistMutation,
+  useGetArtistByIdQuery,
 } from "../../Redux/api/artistApi";
 import { getImageUrl } from "../../utils/baseUrl";
+
+const ArtistCard = ({
+  artist,
+  imageUrl,
+  onEdit,
+  onDelete,
+  isDeleting,
+}) => {
+  const { data: artistByIdResponse } = useGetArtistByIdQuery(
+    artist.id || artist._id
+  );
+  const detailedArtist = artistByIdResponse?.data || artistByIdResponse || artist;
+
+  return (
+    <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/60 border border-white/10 rounded-3xl p-6">
+      <div className="flex flex-col lg:flex-row items-center gap-6">
+        <img
+          src={
+            detailedArtist.image
+              ? `${imageUrl}${detailedArtist.image}`
+              : "https://via.placeholder.com/400?text=No+Image"
+          }
+          alt={detailedArtist.name}
+          className="w-full lg:w-32 h-48 lg:h-32 rounded-2xl object-cover"
+          onError={(e) => {
+            e.target.src = "https://via.placeholder.com/400?text=No+Image";
+          }}
+        />
+
+        <div className="flex-1">
+          <h3 className="text-xl text-white font-display">
+            {detailedArtist.name}
+          </h3>
+          <p className="text-[#bd85f1] mb-2">{detailedArtist.genre}</p>
+
+          {detailedArtist?.bio && (
+            <p className="text-sm text-[#99a1af] mb-4 line-clamp-2">
+              {detailedArtist.bio}
+            </p>
+          )}
+
+          <div className="flex gap-4 text-sm text-[#99a1af]">
+            <span className="flex items-center gap-2">
+              <FaTicketAlt />
+              {detailedArtist.events?.length || 0} Events
+            </span>
+          </div>
+        </div>
+
+        <div className="flex lg:flex-col gap-2">
+          <button
+            onClick={() => onEdit(detailedArtist)}
+            className="px-4 py-2 bg-[#bd85f1]/10 text-[#bd85f1] rounded-xl flex items-center gap-2 cursor-pointer"
+          >
+            <FaEdit />
+            Edit
+          </button>
+
+          <button
+            onClick={() => onDelete(detailedArtist)}
+            disabled={isDeleting}
+            className="px-4 py-2 bg-red-500/10 text-red-400 rounded-xl flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <FaTrash />
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function Artists() {
   const { data: artistsResponse, isLoading, isError } = useGetAllArtistsQuery();
@@ -142,68 +214,17 @@ export default function Artists() {
       {/* Artists List */}
       <div className="space-y-4">
         {paginatedArtists.map((artist) => (
-          <div
+          <ArtistCard
             key={artist.id || artist._id}
-            className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/60 border border-white/10 rounded-3xl p-6"
-          >
-            <div className="flex flex-col lg:flex-row items-center gap-6">
-              <img
-                src={
-                  artist.image
-                    ? `${imageUrl}${artist.image}`
-                    : "https://via.placeholder.com/400?text=No+Image"
-                }
-                alt={artist.name}
-                className="w-full lg:w-32 h-48 lg:h-32 rounded-2xl object-cover"
-                onError={(e) => {
-                  e.target.src =
-                    "https://via.placeholder.com/400?text=No+Image";
-                }}
-              />
-
-              <div className="flex-1">
-                <h3 className="text-xl text-white font-display">
-                  {artist.name}
-                </h3>
-                <p className="text-[#bd85f1] mb-2">{artist.genre}</p>
-
-                {artist?.bio && (
-                  <p className="text-sm text-[#99a1af] mb-4 line-clamp-2">
-                    {artist.bio}
-                  </p>
-                )}
-
-                <div className="flex gap-4 text-sm text-[#99a1af]">
-                  <span className="flex items-center gap-2">
-                    <FaTicketAlt />
-                    {artist.upcomingEvents?.length || 0} Events
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex lg:flex-col gap-2">
-                <button
-                  onClick={() => {
-                    setEditingArtist(artist);
-                    setArtistModalOpen(true);
-                  }}
-                  className="px-4 py-2 bg-[#bd85f1]/10 text-[#bd85f1] rounded-xl flex items-center gap-2 cursor-pointer"
-                >
-                  <FaEdit />
-                  Edit
-                </button>
-
-                <button
-                  onClick={() => confirmDelete(artist)}
-                  disabled={isDeleting}
-                  className="px-4 py-2 bg-red-500/10 text-red-400 rounded-xl flex items-center gap-2 cursor-pointer disabled:opacity-50"
-                >
-                  <FaTrash />
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
+            artist={artist}
+            imageUrl={imageUrl}
+            onEdit={(a) => {
+              setEditingArtist(a);
+              setArtistModalOpen(true);
+            }}
+            onDelete={confirmDelete}
+            isDeleting={isDeleting}
+          />
         ))}
         {paginatedArtists.length === 0 && (
           <div className="text-center text-[#99a1af] py-10">

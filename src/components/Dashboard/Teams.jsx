@@ -6,12 +6,59 @@ import { TeamManagementModal } from "../UI/TeamManagementModal";
 import { DeleteConfirmationModal } from "../UI/DeleteConfirmationModal";
 import {
   useGetAllTeamsQuery,
+  useGetTeamByIdQuery,
   useDeleteTeamMutation,
   useCreateTeamMutation,
   useUpdateTeamMutation,
 } from "../../Redux/api/teamsApi";
 import { toast } from "sonner";
 import { getImageUrl } from "../../utils/baseUrl";
+const TeamCard = ({ team, imageUrl, onEdit, onDelete, isDeleting }) => {
+  const { data: teamByIdResponse } = useGetTeamByIdQuery(team.id || team._id);
+  const detailedTeam = teamByIdResponse?.data?.data || teamByIdResponse?.data || teamByIdResponse || team;
+
+  return (
+    <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/60 border border-white/10 rounded-3xl p-6">
+      <div className="flex flex-col lg:flex-row items-center gap-6">
+        <img
+          src={`${imageUrl}${detailedTeam?.image}`}
+          alt={detailedTeam.name}
+          className="w-full lg:w-32 h-48 lg:h-32 rounded-2xl object-cover"
+          onError={(e) => {
+            e.target.src = "https://via.placeholder.com/400?text=No+Image";
+          }}
+        />
+
+        <div className="flex-1">
+          <h3 className="text-xl text-white font-display">{detailedTeam.name}</h3>
+          <p className="text-[#bd85f1] mb-2">{detailedTeam.genre}</p>
+          {detailedTeam.bio && (
+            <p className="text-[#99a1af] text-sm line-clamp-2">{detailedTeam.bio}</p>
+          )}
+        </div>
+
+        <div className="flex lg:flex-col gap-2">
+          <button
+            onClick={() => onEdit(detailedTeam)}
+            className="px-4 py-2 bg-[#bd85f1]/10 text-[#bd85f1] rounded-xl flex items-center gap-2 cursor-pointer transition hover:bg-[#bd85f1]/20"
+          >
+            <FaEdit />
+            Edit
+          </button>
+
+          <button
+            onClick={() => onDelete(detailedTeam)}
+            disabled={isDeleting}
+            className="px-4 py-2 bg-red-500/10 text-red-400 rounded-xl flex items-center gap-2 cursor-pointer transition hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <FaTrash />
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function Teams() {
   /* -------------------- API -------------------- */
@@ -21,7 +68,6 @@ export default function Teams() {
   const [updateTeam, { isLoading: isUpdating }] = useUpdateTeamMutation();
 
   const teams = teamsResponse?.data?.data || [];
-  console.log(teams);
   const imageUrl = getImageUrl();
 
   /* -------------------- STATE -------------------- */
@@ -83,7 +129,7 @@ export default function Teams() {
   };
 
   /* -------------------- RENDER -------------------- */
-  if (isLoading) {
+  if (isLoading || isCreating || isUpdating) {
     return (
       <div className="flex justify-center items-center h-[92vh]">
         <CircularProgress />
@@ -145,51 +191,17 @@ export default function Teams() {
       {/* Teams List */}
       <div className="space-y-4">
         {paginatedTeams.map((team) => (
-          <div
+          <TeamCard
             key={team.id || team._id}
-            className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/60 border border-white/10 rounded-3xl p-6"
-          >
-            <div className="flex flex-col lg:flex-row items-center gap-6">
-              <img
-                src={`${imageUrl}${team?.image}`}
-                alt={team.name}
-                className="w-full lg:w-32 h-48 lg:h-32 rounded-2xl object-cover"
-                onError={(e) => {
-                  e.target.src = "https://via.placeholder.com/400?text=No+Image";
-                }}
-              />
-
-              <div className="flex-1">
-                <h3 className="text-xl text-white font-display">{team.name}</h3>
-                <p className="text-[#bd85f1] mb-2">{team.genre}</p>
-                {team.bio && (
-                  <p className="text-[#99a1af] text-sm line-clamp-2">{team.bio}</p>
-                )}
-              </div>
-
-              <div className="flex lg:flex-col gap-2">
-                <button
-                  onClick={() => {
-                    setEditingTeam(team);
-                    setTeamModalOpen(true);
-                  }}
-                  className="px-4 py-2 bg-[#bd85f1]/10 text-[#bd85f1] rounded-xl flex items-center gap-2 cursor-pointer transition hover:bg-[#bd85f1]/20"
-                >
-                  <FaEdit />
-                  Edit
-                </button>
-
-                <button
-                  onClick={() => confirmDelete(team)}
-                  disabled={isDeleting}
-                  className="px-4 py-2 bg-red-500/10 text-red-400 rounded-xl flex items-center gap-2 cursor-pointer transition hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <FaTrash />
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
+            team={team}
+            imageUrl={imageUrl}
+            onEdit={(t) => {
+              setEditingTeam(t);
+              setTeamModalOpen(true);
+            }}
+            onDelete={confirmDelete}
+            isDeleting={isDeleting}
+          />
         ))}
 
         {paginatedTeams.length === 0 && (
