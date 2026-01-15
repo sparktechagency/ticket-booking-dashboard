@@ -1,24 +1,57 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   IconButton,
   InputAdornment,
   TextField,
   Avatar,
+  CircularProgress,
 } from "@mui/material";
 import { IoMdEye, IoIosEyeOff } from "react-icons/io";
 import { FaUser, FaLock, FaCamera, FaSave } from "react-icons/fa";
 
 import profileImg from "../../../../public/Images/profile.png";
 import { toast } from "sonner";
+import {
+  useGetUserProfileQuery,
+  useEditProfileMutation,
+} from "../../../Redux/api/profileApi";
+import { useChangePasswordMutation } from "../../../Redux/api/authApi";
 
 export default function Profile() {
+  // Fetch profile data from API
+  const {
+    data: profileData,
+    isLoading: isLoadingProfile,
+    isError: isProfileError,
+    error: profileError,
+  } = useGetUserProfileQuery();
+
+  // Edit profile mutation
+  const [editProfile, { isLoading: isUpdating }] = useEditProfileMutation();
+
+  // Change password mutation
+  const [changePassword, { isLoading: isChangingPassword }] =
+    useChangePasswordMutation();
+
   const [adminProfile, setAdminProfile] = useState({
-    name: "Charlene Reed",
-    email: "charlenereed@gmail.com",
-    phone: "+1 555 234 5678",
+    name: "",
+    email: "",
+    phone: "",
     avatar: profileImg,
   });
+
+  // Update local state when API data is loaded
+  useEffect(() => {
+    if (profileData?.data) {
+      setAdminProfile({
+        name: profileData.data.name || "",
+        email: profileData.data.email || "",
+        phone: profileData.data.phone || "",
+        avatar: profileData.data.image || profileData.data.avatar || profileImg,
+      });
+    }
+  }, [profileData]);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -41,19 +74,64 @@ export default function Profile() {
     reader.readAsDataURL(file);
   };
 
-  const handleSave = () => {
-    console.log("Profile Saved:", adminProfile);
+  const handleSave = async () => {
+    try {
+      // Prepare data for API
+      const updateData = {
+        name: adminProfile.name,
+        phone: adminProfile.phone,
+      };
+
+      // Include avatar if it's a base64 string (newly uploaded)
+      if (adminProfile.avatar && adminProfile.avatar.startsWith("data:")) {
+        updateData.image = adminProfile.avatar;
+      }
+
+      const response = await editProfile(updateData).unwrap();
+      toast.success("Profile updated successfully!");
+      console.log("Profile Updated:", response);
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      toast.error(error?.data?.message || "Failed to update profile");
+    }
   };
 
-  const handleUpdatePassword = () => {
-    if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match!");
+  const handleUpdatePassword = async () => {
+    // Validation
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("Please fill in all password fields");
       return;
     }
-    console.log("Password Updated");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords do not match!");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+
+    try {
+      const passwordData = {
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword,
+      };
+
+      const response = await changePassword(passwordData).unwrap();
+      toast.success("Password updated successfully!");
+      console.log("Password Updated:", response);
+
+      // Clear password fields on success
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.error("Failed to update password:", error);
+      toast.error(error?.data?.message || "Failed to update password");
+    }
   };
 
   const textFieldStyles = {
@@ -102,14 +180,48 @@ export default function Profile() {
         </p>
       </div>
 
-      {/* Profile Information */}
-      <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 border border-white/10 rounded-3xl p-4">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 bg-[#bd85f1]/20 rounded-xl flex items-center justify-center">
-            <FaUser className="text-[#bd85f1]" />
+      {/* Loading State */}
+      {isLoadingProfile && (
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <CircularProgress
+              sx={{
+                color: "#bd85f1",
+                marginBottom: 2,
+              }}
+            />
+            <p className="text-[#99a1af] font-sans">Loading profile...</p>
           </div>
-          <h3 className="text-xl text-white font-krona">Profile Information</h3>
         </div>
+      )}
+
+      {/* Error State */}
+      {isProfileError && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-3xl p-6">
+          <p className="text-red-400 font-sans">
+            Failed to load profile data. Please try again later.
+          </p>
+          {profileError?.data?.message && (
+            <p className="text-red-300 text-sm mt-2">
+              {profileError.data.message}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Profile Content - Only show when data is loaded */}
+      {!isLoadingProfile && !isProfileError && (
+        <>
+          {/* Profile Information */}
+          <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 border border-white/10 rounded-3xl p-4">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-[#bd85f1]/20 rounded-xl flex items-center justify-center">
+                <FaUser className="text-[#bd85f1]" />
+              </div>
+              <h3 className="text-xl text-white font-krona">
+                Profile Information
+              </h3>
+            </div>
         {/* Avatar */}
         <div className="flex items-center gap-6 mb-6">
           <div className="relative">
@@ -181,7 +293,8 @@ export default function Profile() {
           <Button
             onClick={handleSave}
             variant="contained"
-            startIcon={<FaSave />}
+            startIcon={isUpdating ? <CircularProgress size={16} /> : <FaSave />}
+            disabled={isUpdating}
             sx={{
               px: 3,
               py: 1,
@@ -194,16 +307,20 @@ export default function Profile() {
                 background: "linear-gradient(to right, #5b189b, #a66fd9)",
                 transform: "scale(1.05)",
               },
+              "&:disabled": {
+                background: "rgba(109, 29, 185, 0.5)",
+                color: "rgba(255, 255, 255, 0.5)",
+              },
               transition: "all 0.3s",
             }}
           >
-            Save Changes
+            {isUpdating ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </div>
 
       {/* Security Settings */}
-      <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 border border-white/10 rounded-3xl p-4">
+      {/* <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 border border-white/10 rounded-3xl p-4">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-[#bd85f1]/20 rounded-xl flex items-center justify-center">
             <FaLock className="text-[#bd85f1]" />
@@ -296,6 +413,10 @@ export default function Profile() {
           <Button
             onClick={handleUpdatePassword}
             variant="outlined"
+            disabled={isChangingPassword}
+            startIcon={
+              isChangingPassword ? <CircularProgress size={16} /> : null
+            }
             sx={{
               px: 3,
               py: 1.5,
@@ -309,12 +430,19 @@ export default function Profile() {
                 backgroundColor: "rgba(255,255,255,0.1)",
                 borderColor: "rgba(255,255,255,0.1)",
               },
+              "&:disabled": {
+                backgroundColor: "rgba(255,255,255,0.02)",
+                borderColor: "rgba(255,255,255,0.05)",
+                color: "rgba(255,255,255,0.3)",
+              },
             }}
           >
-            Update Password
+            {isChangingPassword ? "Updating..." : "Update Password"}
           </Button>
         </div>
-      </div>
+      </div> */}
+        </>
+      )}
     </div>
   );
 }
