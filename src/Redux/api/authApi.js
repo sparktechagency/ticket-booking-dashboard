@@ -43,6 +43,24 @@ const authApi = baseApi.injectEndpoints({
         };
       },
       invalidatesTags: ["user"],
+    }), 
+      // Change Password
+    changePassword: build.mutation({
+      query: (data) => {
+        console.log(data);
+        const token = sessionStorage.getItem("accessToken");
+        console.log("accessToken", token);
+        return {
+          url: "/auth/change-password",
+          method: "POST",
+          body: data,
+          headers: {
+            "content-type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        };
+      },
+      invalidatesTags: ["user"],
     }),
   }),
 });
@@ -52,4 +70,5 @@ export const {
   useForgotPasswordMutation,
   useVerifyOtpMutation,
   useUpdatePasswordMutation,
+  useChangePasswordMutation,
 } = authApi;

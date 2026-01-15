@@ -13,6 +13,7 @@ import RevenueManagement from "../Dashboard/Artists";
 import Support from "../Dashboard/Transactions";
 import Reliability from "../Dashboard/Users";
 import Events from "../Dashboard/Events";
+import Teams from "../Dashboard/Teams";
 import Orders from "../Dashboard/Orders";
 import ProtectedRoute from "../../utils/ProtectedRoute";
 
@@ -60,6 +61,10 @@ const router = createBrowserRouter([
           {
             path: "artists",
             element: <RevenueManagement />,
+          },
+          {
+            path: "teams",
+            element: <Teams />,
           },
           {
             path: "orders",

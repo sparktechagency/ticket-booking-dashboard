@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -14,114 +13,30 @@ import {
   Select,
   MenuItem,
   FormControl,
+  CircularProgress,
 } from "@mui/material";
 import { FaFilter } from "react-icons/fa6";
-
-const mockTransactions = [
-  {
-    id: "TXN001",
-    type: "income",
-    description: "Ticket Sale - Coldplay Live",
-    amount: 450.0,
-    status: "completed",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    orderId: "ORD12345",
-    customerName: "John Doe",
-  },
-  {
-    id: "TXN002",
-    type: "refund",
-    description: "Refund - Ed Sheeran Concert",
-    amount: -280.0,
-    status: "completed",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 5),
-    orderId: "ORD12344",
-    customerName: "Sarah Smith",
-  },
-  {
-    id: "TXN003",
-    type: "income",
-    description: "Ticket Sale - Taylor Swift Era",
-    amount: 890.0,
-    status: "completed",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 12),
-    orderId: "ORD12343",
-    customerName: "Mike Johnson",
-  },
-  {
-    id: "TXN004",
-    type: "payout",
-    description: "Bank Transfer - Weekly Payout",
-    amount: -5000.0,
-    status: "pending",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 24),
-  },
-  {
-    id: "TXN005",
-    type: "fee",
-    description: "Platform Fee - Month of December",
-    amount: -125.0,
-    status: "completed",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 48),
-  },
-  {
-    id: "TXN006",
-    type: "income",
-    description: "Ticket Sale - Bruno Mars Concert",
-    amount: 650.0,
-    status: "completed",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 72),
-    orderId: "ORD12342",
-    customerName: "Emily Davis",
-  },
-  {
-    id: "TXN007",
-    type: "refund",
-    description: "Refund - Weekend Festival Pass",
-    amount: -320.0,
-    status: "completed",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 96),
-    orderId: "ORD12341",
-    customerName: "Alex Brown",
-  },
-  {
-    id: "TXN008",
-    type: "income",
-    description: "Ticket Sale - Jazz Night Live",
-    amount: 180.0,
-    status: "completed",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 120),
-    orderId: "ORD12340",
-    customerName: "Chris Wilson",
-  },
-  {
-    id: "TXN009",
-    type: "payout",
-    description: "Bank Transfer - Monthly Payout",
-    amount: -8500.0,
-    status: "completed",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 144),
-  },
-  {
-    id: "TXN010",
-    type: "fee",
-    description: "Processing Fee - Q4 2024",
-    amount: -95.0,
-    status: "completed",
-    date: new Date(Date.now() - 1000 * 60 * 60 * 168),
-  },
-];
+import { useGetAllTransactionsQuery } from "../../Redux/api/transactionApi";
+import dayjs from "dayjs";
+import { useState } from "react";
 
 export default function Transactions() {
-  const [transactions] = useState(mockTransactions);
+  const {
+    data: transactionsResponse,
+    isLoading,
+    isError,
+  } = useGetAllTransactionsQuery();
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(8);
   const [filterType, setFilterType] = useState("all");
+
+  const transactions = transactionsResponse?.data || [];
+  console.log(transactions);
 
   // Filter transactions based on type
   const filteredTransactions = transactions.filter((transaction) => {
     if (filterType === "all") return true;
-    return transaction.status === filterType;
+    return transaction.status?.toLowerCase() === filterType.toLowerCase();
   });
 
   const handleChangePage = (event, newPage) => {
@@ -137,6 +52,24 @@ export default function Transactions() {
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[92vh]">
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex justify-center items-center h-[92vh]">
+        <p className="text-white">
+          Something went wrong while loading transactions.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 min-h-screen bg-[#0a0d27] p-6">
@@ -178,9 +111,10 @@ export default function Transactions() {
                   },
                 }}
               >
-                <MenuItem value="all">All</MenuItem>
-                <MenuItem value="completed">Completed</MenuItem>
+                <MenuItem value="all">All Status</MenuItem>
+                <MenuItem value="succeeded">Succeeded</MenuItem>
                 <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="cancelled">Cancelled</MenuItem>
               </Select>
             </FormControl>
             <FaFilter className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -209,7 +143,6 @@ export default function Transactions() {
             >
               {[
                 "Transaction ID",
-
                 "Description",
                 "Date",
                 "Status",
@@ -235,7 +168,7 @@ export default function Transactions() {
           <TableBody>
             {paginatedTransactions.map((transaction) => (
               <TableRow
-                key={transaction.id}
+                key={transaction._id || transaction.id}
                 sx={{
                   borderTop: "1px solid rgba(255,255,255,0.05)",
                   "&:hover": {
@@ -244,13 +177,20 @@ export default function Transactions() {
                 }}
               >
                 <TableCell sx={{ padding: "16px 24px", color: "white" }}>
-                  #{transaction.id}
+                  #
+                  {transaction.transactionId ||
+                    (transaction._id || transaction.id).substring(0, 8)}
                 </TableCell>
 
                 <TableCell sx={{ padding: "16px 24px" }}>
                   <div>
                     <p className="text-white font-sans text-sm">
-                      {transaction.description}
+                      {transaction.description ||
+                        `Order #${
+                          (transaction.orderId?._id || transaction.orderId || "")
+                            .toString()
+                            .substring(0, 8) || "N/A"
+                        }`}
                     </p>
                     {transaction.customerName && (
                       <p className="text-xs text-[#99a1af] font-sans">
@@ -261,19 +201,23 @@ export default function Transactions() {
                 </TableCell>
 
                 <TableCell sx={{ padding: "16px 24px", color: "#9ca3af" }}>
-                  {transaction.date.toLocaleDateString()}{" "}
-                  {transaction.date.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  {dayjs(transaction.createdAt || transaction.date).format(
+                    "MMM DD, YYYY"
+                  )}
+                  <br />
+                  <span className="text-xs">
+                    {dayjs(transaction.createdAt || transaction.date).format(
+                      "h:mm A"
+                    )}
+                  </span>
                 </TableCell>
 
                 <TableCell sx={{ padding: "16px 24px" }}>
                   <span
                     className={`inline-flex px-3 py-1 rounded-lg text-xs font-sans capitalize ${
-                      transaction.status === "completed"
+                      transaction.status?.toLowerCase() === "succeeded"
                         ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                        : transaction.status === "pending"
+                        : transaction.status?.toLowerCase() === "pending"
                         ? "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20"
                         : "bg-red-500/10 text-red-400 border border-red-500/20"
                     }`}
@@ -290,10 +234,20 @@ export default function Transactions() {
                   }}
                 >
                   {transaction.amount >= 0 ? "+" : ""}$
-                  {Math.abs(transaction.amount).toFixed(2)}
+                  {Math.abs(transaction.amount || 0).toFixed(2)}
                 </TableCell>
               </TableRow>
             ))}
+            {paginatedTransactions.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  sx={{ textAlign: "center", py: 5, color: "#99a1af" }}
+                >
+                  No transactions found.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
 

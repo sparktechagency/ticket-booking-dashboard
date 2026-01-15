@@ -12,7 +12,7 @@ import PrivacyPolicy from "./ContentManagement/PrivacyPolicy";
 import TermsAndConditions from "./ContentManagement/TermsAndConditions";
 
 export function ContentManagement() {
-  const [activeSection, setActiveSection] = useState("contact");
+  const [activeSection, setActiveSection] = useState("faq");
   const [cmsContent, setCmsContent] = useState(demoCmsContent);
 
   const handleSave = () => {

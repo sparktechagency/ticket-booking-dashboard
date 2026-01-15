@@ -68,28 +68,34 @@ const darkLabelSx = {
   },
 };
 
+// ... imports
+import { getImageUrl } from "../../utils/baseUrl";
+
+// ... constants
+
 export function EventManagementModal({
   event,
   artists,
+  teams,
   isOpen,
   onClose,
   onSave,
 }) {
-  console.log(artists);
+  const imageUrlBase = getImageUrl();
   const [formData, setFormData] = useState({
     title: event?.title || "",
-    artistId: event?.artistId || "",
-    artist: event?.artist || "",
+    artistId: event?.artistId || "", // Assuming this is an ID
+    artist: event?.artist || "", // For display if needed, but selecting via ID usually
     date: event?.date || "",
     time: event?.time || "20:00",
     venue: event?.venue || "",
     city: event?.city || "",
     location: event?.location || "",
     category: event?.category || "concert",
-    imageUrl: event?.imageUrl || "",
-    teams: [],
+    imageUrl: event?.imageUrl || event?.thumbnail || "",
+    teams: event?.teams || [],
     imageFile: undefined,
-    seatingChartUrl: event?.seatingChartUrl || "",
+    seatingChartUrl: event?.seatingChartUrl || event?.seatingChart || "",
     seatingChartFile: undefined,
     description: event?.description || "",
     ticketsAvailable: event ? event.ticketCategories.length > 0 : false,
@@ -106,17 +112,69 @@ export function EventManagementModal({
   });
 
   const [activeTab, setActiveTab] = useState(0);
-  const [imagePreview, setImagePreview] = useState(event?.imageUrl || "");
-  const [seatingPreview, setSeatingPreview] = useState(
-    event?.seatingChartUrl || ""
-  );
+  const [imagePreview, setImagePreview] = useState("");
+  const [seatingPreview, setSeatingPreview] = useState("");
 
   useEffect(() => {
     if (event) {
-      setImagePreview(event.imageUrl || "");
-      setSeatingPreview(event.seatingChartUrl || "");
+       // Construct previews
+       const imgPath = event.imageUrl || event.thumbnail;
+       setImagePreview(imgPath ? (imgPath.startsWith("http") ? imgPath : `${imageUrlBase}${imgPath}`) : "");
+
+       const seatPath = event.seatingChartUrl || event.seatingChart;
+       setSeatingPreview(seatPath ? (seatPath.startsWith("http") ? seatPath : `${imageUrlBase}${seatPath}`) : "");
+       
+       setFormData({
+         // ... populate form data
+         title: event.title || "",
+         artistId: event.artist?._id || event.artistId?._id || event.artist || event.artistId || "", 
+         // Ensure artistId is the ID string if populating from populated object
+         date: event.eventDate ? event.eventDate.split('T')[0] : (event.date ? event.date.split('T')[0] : ""),
+         time: event.eventDate ? event.eventDate.split('T')[1].substring(0, 5) : (event.time || "20:00"),
+         venue: event.venueName || event.venue || "", 
+         city: event.city || "",
+         location: event.fullAddress || event.location || "",
+         category: event.category ? event.category.toLowerCase() : "concert",
+         teams: (event.teamA && event.teamB) ? [event.teamA._id || event.teamA, event.teamB._id || event.teamB] : (event.teams || []),
+         description: event.description || "",
+         imageUrl: imgPath || "",
+         seatingChartUrl: seatPath || "",
+         ticketCategories: event.ticketCategories?.map((cat) => ({ 
+             id: cat._id || cat.id,
+             name: cat.ticketName || cat.name,
+             color: cat.sectionColor || cat.color,
+             basePrice: cat.pricePerTicket || cat.basePrice,
+             totalQuantity: cat.totalQuantity,
+             availableQuantity: cat.availableQuantity, // Assuming this stays same or backend handles it
+             notes: cat.notes || "",
+         })) || [],
+         ticketsAvailable: event.ticketCategories?.length > 0
+       });
+    } else {
+       // Reset
+       setImagePreview("");
+       setSeatingPreview("");
+       setFormData({
+        title: "",
+        artistId: "",
+        artist: "",
+        date: "",
+        time: "20:00",
+        venue: "",
+        city: "",
+        location: "",
+        category: "concert",
+        imageUrl: "",
+        teams: [],
+        imageFile: undefined,
+        seatingChartUrl: "",
+        seatingChartFile: undefined,
+        description: "",
+        ticketsAvailable: false,
+        ticketCategories: [],
+      });
     }
-  }, [event]);
+  }, [event, isOpen, imageUrlBase]);
 
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
@@ -149,7 +207,7 @@ export function EventManagementModal({
   };
 
   const handleArtistChange = (artistId) => {
-    const selected = artists.find((a) => a.id === artistId);
+    const selected = artists.find((a) => (a.id || a._id) === artistId);
     if (selected) {
       setFormData((prev) => ({ ...prev, artistId, artist: selected.name }));
     }
@@ -203,6 +261,7 @@ export function EventManagementModal({
   };
 
   const handleSave = () => {
+    // Basic validation
     if (
       !formData.title ||
       !formData.date ||
@@ -212,20 +271,13 @@ export function EventManagementModal({
       toast.warning("Please fill in all required fields.");
       return;
     }
-    if (!formData.imageUrl) {
+
+    if (!event && !formData.imageFile) {
       toast.warning("Please upload an event thumbnail.");
       return;
     }
-    if (formData.ticketsAvailable) {
-      const invalid = formData.ticketCategories.some(
-        (c) => !c.name || c.basePrice <= 0 || c.totalQuantity <= 0
-      );
-      if (invalid) {
-        toast.warning("Please complete all ticket category information.");
-        return;
-      }
-    }
 
+    // Category-specific validation
     if (formData.category === "concert" && !formData.artistId) {
       toast.warning("Please select an artist.");
       return;
@@ -239,14 +291,65 @@ export function EventManagementModal({
       return;
     }
 
-    onSave(formData);
+    const dataToSend = new FormData();
+
+    // Construct eventDate combining date and time
+    // Default time to 00:00:00 if not provided, though we have a time picker
+    const dateTimeString = `${formData.date}T${formData.time || "00:00"}:00.000Z`;
+
+    // Map ticket categories to backend structure
+    const mappedTickets = formData.ticketCategories.map(t => ({
+      ticketName: t.name,
+      sectionColor: t.color.startsWith("#") ? (COLOR_NAMES[t.color] || "Red") : t.color, 
+      pricePerTicket: Number(t.basePrice),
+      totalQuantity: Number(t.totalQuantity)
+      // Assuming 'notes' or other fields aren't needed based on the user request, 
+      // or if they are, the backend ignores them. User provided generic structure.
+    }));
+
+    // Base payload
+    const payload = {
+      title: formData.title,
+      category: formData.category.charAt(0).toUpperCase() + formData.category.slice(1), // Capitalize "Sports" / "Concert"
+      eventDate: dateTimeString,
+      city: formData.city,
+      venueName: formData.venue,
+      fullAddress: formData.location,
+      ticketCategories: formData.ticketsAvailable ? mappedTickets : [],
+    };
+
+    // Add category-specific fields
+    if (formData.category === "sports") {
+      // teams contains IDs based on previous fixes
+      payload.teamA = formData.teams[0];
+      payload.teamB = formData.teams[1];
+    } else if (formData.category === "concert") {
+      payload.artistId = formData.artistId;
+    }
+
+    dataToSend.append("data", JSON.stringify(payload));
+
+    if (formData.imageFile) {
+      dataToSend.append("thumbnail", formData.imageFile);
+    }
+
+    if (formData.seatingChartFile) {
+      // User specified 'seatingView' as the file key
+      dataToSend.append("seatingView", formData.seatingChartFile);
+    }
+
+    onSave(dataToSend);
     onClose();
   };
 
   return (
     <Modal
       open={isOpen}
-      onClose={onClose}
+      onClose={(event, reason) => {
+        if (reason !== "backdropClick") {
+          onClose();
+        }
+      }}
       closeAfterTransition
       BackdropComponent={Backdrop}
       BackdropProps={{ timeout: 500 }}
@@ -365,6 +468,7 @@ export function EventManagementModal({
                 handleArtistChange={handleArtistChange}
                 handleTeamChange={handleTeamChange}
                 artists={artists}
+                teams={teams}
               />
             )}
 

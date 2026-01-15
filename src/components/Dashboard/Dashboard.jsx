@@ -55,7 +55,7 @@ export default function Dashboard() {
 
   /* ---------------- RENDER ---------------- */
   return (
-    <div className="p-8 bg-[#0a0d27] h-screen">
+    <div className="p-8 bg-[#0a0d27] h-full">
       <div className="space-y-8">
         {/* HEADER */}
         <div className="flex justify-between items-center">

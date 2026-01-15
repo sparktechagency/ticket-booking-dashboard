@@ -57,6 +57,7 @@ export default function EventDetailsForm({
   handleArtistChange,
   handleTeamChange,
   artists,
+  teams,
 }) {
   return (
     <>
@@ -363,7 +364,7 @@ export default function EventDetailsForm({
             >
               <MenuItem value="">Select an artist...</MenuItem>
               {artists?.map((artist) => (
-                <MenuItem key={artist.id} value={artist.id}>
+                <MenuItem key={artist.id || artist._id} value={artist.id || artist._id}>
                   {artist.name} - {artist.genre}
                 </MenuItem>
               ))}
@@ -382,8 +383,8 @@ export default function EventDetailsForm({
                 sx={outlinedFieldSx}
               >
                 <MenuItem value="">Select Team A</MenuItem>
-                {artists?.map((team) => (
-                  <MenuItem key={team.id} value={team.name}>
+                {teams?.map((team) => (
+                  <MenuItem key={team.id || team._id} value={team.id || team._id}>
                     {team.name}
                   </MenuItem>
                 ))}
@@ -398,8 +399,8 @@ export default function EventDetailsForm({
                 sx={outlinedFieldSx}
               >
                 <MenuItem value="">Select Team B</MenuItem>
-                {artists?.map((team) => (
-                  <MenuItem key={team.id} value={team.name}>
+                {teams?.map((team) => (
+                  <MenuItem key={team.id || team._id} value={team.id || team._id}>
                     {team.name}
                   </MenuItem>
                 ))}
