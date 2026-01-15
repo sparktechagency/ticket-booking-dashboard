@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   TextField,
   Button,
@@ -6,16 +7,23 @@ import {
   Container,
   Grid,
   InputAdornment,
+  IconButton,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
+
 import { HiOutlineMailOpen } from "react-icons/hi";
 import { MdOutlineLock } from "react-icons/md";
-import { toast } from "sonner";
+import { IoIosEyeOff, IoMdEye } from "react-icons/io";
+
 import { useLogInMutation } from "../Redux/api/authApi";
+import { toast } from "sonner";
 
 const SignIn = () => {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   const [login] = useLogInMutation();
+
+  const handleShowPassword = () => setShowPassword((prev) => !prev);
 
   const onFinish = async (e) => {
     e.preventDefault();
@@ -42,8 +50,13 @@ const SignIn = () => {
       }
     } catch (error) {
       console.error("Error user login:", error);
-      if (error.data) {
-        toast.error("Something went wrong while logging in.");
+      if (error.data.message === "User doesn't exist!") {
+        toast.error("User doesn't exist!");
+      }
+      if (error.data.message === "Password is incorrect!") {
+        toast.error("Password is incorrect!");
+      } else {
+        toast.error("Something went wrong. Please reload the page & try again");
       }
     }
   };
@@ -115,7 +128,7 @@ const SignIn = () => {
               <TextField
                 label="Password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 fullWidth
                 required
                 margin="normal"
@@ -125,6 +138,30 @@ const SignIn = () => {
                   startAdornment: (
                     <MdOutlineLock className="text-[#ddaef8] text-xl mr-2" />
                   ),
+                }}
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label={
+                            showPassword ? "Hide password" : "Show password"
+                          }
+                          onClick={handleShowPassword}
+                          edge="end"
+                          sx={{
+                            color: "#c4b5fd",
+                            "&:hover": {
+                              color: "#a78bfa",
+                              backgroundColor: "rgba(168, 85, 247, 0.1)",
+                            },
+                          }}
+                        >
+                          {showPassword ? <IoIosEyeOff /> : <IoMdEye />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  },
                 }}
                 sx={{
                   "& .MuiOutlinedInput-root": {

@@ -97,7 +97,7 @@ export default function FAQ({ textFieldStyles }) {
             <div className="w-10 h-10 bg-gradient-to-br from-[#bd85f1]/20 to-[#6d1db9]/10 rounded-xl flex items-center justify-center">
               <FiHelpCircle className="w-5 h-5 text-[#bd85f1]" />
             </div>
-            <h3 className="text-xl text-white font-display">FAQ Management</h3>
+            <h3 className="text-xl text-white">FAQ Management</h3>
           </div>
 
           <Button

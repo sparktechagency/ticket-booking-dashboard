@@ -1,11 +1,7 @@
+"use client";
+
 import JoditEditor from "jodit-react";
 import { useEffect, useRef, useState } from "react";
-
-// import { toast } from "sonner";
-// import {
-//   useGetSettingsQuery,
-//   useUpdateSettingsMutation,
-// } from "../../../Redux/api/settingsApi";
 import { Button, CircularProgress } from "@mui/material";
 import { MdArrowBackIosNew } from "react-icons/md";
 import {
@@ -18,9 +14,10 @@ const PrivacyPolicy = () => {
   const editor = useRef(null);
   const [content, setContent] = useState("");
 
+  // Jodit Editor configuration
   const config = {
     readonly: false,
-    height: "450px",
+    height: 450,
     width: "100%",
     theme: "dark",
     style: {
@@ -28,84 +25,100 @@ const PrivacyPolicy = () => {
       border: "1px solid rgba(189, 133, 241, 0.3)",
       color: "white",
     },
+    toolbarSticky: true,
   };
 
+  // Fetch existing privacy policy
   const {
     data: getPrivacyData,
     isLoading: isFetching,
     error: fetchError,
     refetch,
   } = useGetPrivacyPolicyQuery();
+
   const privacyData = getPrivacyData?.data;
-  console.log(privacyData);
 
-  const [addSettings, { isLoading: isAdding }] = useAddPrivacyPolicyMutation();
+  const [addPrivacyPolicy, { isLoading: isAdding }] =
+    useAddPrivacyPolicyMutation();
 
+  // Populate editor when data is fetched
   useEffect(() => {
-    if (privacyData?.data) {
-      setContent(privacyData.data);
+    if (privacyData?.length) {
+      const latest = privacyData.reduce((latest, current) =>
+        new Date(current.createdAt) > new Date(latest.createdAt)
+          ? current
+          : latest
+      );
+      setContent(latest.content);
     }
   }, [privacyData]);
 
+  // Save updated privacy policy
   const handleOnSave = async () => {
     try {
-      const response = await addSettings({
-        termsOfService: content,
-      }).unwrap();
+      const response = await addPrivacyPolicy({ content }).unwrap();
       console.log(response);
-      toast.success("Terms and Conditions updated successfully!");
-
-      refetch();
+      if (response.success) {
+        toast.success("Privacy Policy updated successfully!");
+        refetch();
+      }
     } catch (error) {
-      toast.error("Failed to save Terms and Conditions. Please try again.");
+      toast.error("Failed to save Privacy Policy. Please try again.");
       console.error("Save error:", error);
     }
   };
 
+  // Loading state
   if (isFetching || isAdding) {
     return (
       <div className="flex justify-center items-center h-[92vh]">
-        <CircularProgress />
+        <CircularProgress sx={{ color: "#bd85f1" }} />
       </div>
     );
   }
 
+  // Error state
   if (fetchError) {
     return (
-      <div className="text-white">
+      <div className="text-white text-center mt-10">
         Error loading Privacy Policy. Please try again later.
       </div>
     );
   }
 
   return (
-    <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 backdrop-blur-xl border border-white/10 rounded-3xl p-4">
-      <div className="flex items-center justify-between ">
-        <div className="flex items-center gap-2">
+    <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 backdrop-blur-xl border border-white/10 rounded-3xl p-6 space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
           <Button
             onClick={() => window.history.back()}
             sx={{
               py: 1,
+              px: 1.5,
               background: "linear-gradient(to right, #6d1db9, #bd85f1)",
               borderRadius: "12px",
               textTransform: "none",
               color: "white",
               fontSize: "14px",
-              boxShadow: "0 10px 40px rgba(109, 29, 185, 0.3)",
+              boxShadow: "0 10px 40px rgba(109,29,185,0.3)",
               "&:hover": {
                 background: "linear-gradient(to right, #5b189b, #a66fd9)",
                 transform: "scale(1.05)",
               },
+              transition: "all 0.3s",
             }}
           >
             <MdArrowBackIosNew />
-          </Button>{" "}
-          <h1 className="text-2xl font-bold  text-white font-krona">
+          </Button>
+          <h1 className="text-2xl font-bold text-white font-krona">
             Privacy Policy
-          </h1>{" "}
+          </h1>
         </div>
+
         <Button
           onClick={handleOnSave}
+          disabled={isAdding}
           sx={{
             px: 3,
             py: 1,
@@ -114,7 +127,7 @@ const PrivacyPolicy = () => {
             textTransform: "none",
             color: "white",
             fontSize: "14px",
-            boxShadow: "0 10px 40px rgba(109, 29, 185, 0.3)",
+            boxShadow: "0 10px 40px rgba(109,29,185,0.3)",
             "&:hover": {
               background: "linear-gradient(to right, #5b189b, #a66fd9)",
               transform: "scale(1.05)",
@@ -122,11 +135,12 @@ const PrivacyPolicy = () => {
             transition: "all 0.3s",
           }}
         >
-          Save & Change
+          {isAdding ? "Saving..." : "Save & Change"}
         </Button>
       </div>
 
-      <div className="my-3">
+      {/* Editor */}
+      <div className="mt-4">
         <JoditEditor
           ref={editor}
           value={content}
@@ -137,4 +151,5 @@ const PrivacyPolicy = () => {
     </div>
   );
 };
+
 export default PrivacyPolicy;
