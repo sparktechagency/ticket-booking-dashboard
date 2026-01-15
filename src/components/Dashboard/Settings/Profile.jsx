@@ -16,7 +16,7 @@ import {
   useGetUserProfileQuery,
   useEditProfileMutation,
 } from "../../../Redux/api/profileApi";
-import { useChangePasswordMutation } from "../../../Redux/api/authApi";
+// import { useChangePasswordMutation } from "../../../Redux/api/authApi";
 
 export default function Profile() {
   // Fetch profile data from API
@@ -31,8 +31,8 @@ export default function Profile() {
   const [editProfile, { isLoading: isUpdating }] = useEditProfileMutation();
 
   // Change password mutation
-  const [changePassword, { isLoading: isChangingPassword }] =
-    useChangePasswordMutation();
+  // const [changePassword, { isLoading: isChangingPassword }] =
+  //   useChangePasswordMutation();
 
   const [adminProfile, setAdminProfile] = useState({
     name: "",
@@ -53,12 +53,12 @@ export default function Profile() {
     }
   }, [profileData]);
 
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // const [currentPassword, setCurrentPassword] = useState("");
+  // const [newPassword, setNewPassword] = useState("");
+  // const [confirmPassword, setConfirmPassword] = useState("");
+  // const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  // const [showNewPassword, setShowNewPassword] = useState(false);
+  // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -96,43 +96,43 @@ export default function Profile() {
     }
   };
 
-  const handleUpdatePassword = async () => {
-    // Validation
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error("Please fill in all password fields");
-      return;
-    }
+  // const handleUpdatePassword = async () => {
+  //   // Validation
+  //   if (!currentPassword || !newPassword || !confirmPassword) {
+  //     toast.error("Please fill in all password fields");
+  //     return;
+  //   }
 
-    if (newPassword !== confirmPassword) {
-      toast.error("New passwords do not match!");
-      return;
-    }
+  //   if (newPassword !== confirmPassword) {
+  //     toast.error("New passwords do not match!");
+  //     return;
+  //   }
 
-    if (newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters long");
-      return;
-    }
+  //   if (newPassword.length < 6) {
+  //     toast.error("Password must be at least 6 characters long");
+  //     return;
+  //   }
 
-    try {
-      const passwordData = {
-        currentPassword: currentPassword,
-        newPassword: newPassword,
-        confirmPassword: confirmPassword,
-      };
+  //   try {
+  //     const passwordData = {
+  //       currentPassword: currentPassword,
+  //       newPassword: newPassword,
+  //       confirmPassword: confirmPassword,
+  //     };
 
-      const response = await changePassword(passwordData).unwrap();
-      toast.success("Password updated successfully!");
-      console.log("Password Updated:", response);
+  //     const response = await changePassword(passwordData).unwrap();
+  //     toast.success("Password updated successfully!");
+  //     console.log("Password Updated:", response);
 
-      // Clear password fields on success
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (error) {
-      console.error("Failed to update password:", error);
-      toast.error(error?.data?.message || "Failed to update password");
-    }
-  };
+  //     // Clear password fields on success
+  //     setCurrentPassword("");
+  //     setNewPassword("");
+  //     setConfirmPassword("");
+  //   } catch (error) {
+  //     console.error("Failed to update password:", error);
+  //     toast.error(error?.data?.message || "Failed to update password");
+  //   }
+  // };
 
   const textFieldStyles = {
     "& .MuiOutlinedInput-root": {
@@ -222,105 +222,107 @@ export default function Profile() {
                 Profile Information
               </h3>
             </div>
-        {/* Avatar */}
-        <div className="flex items-center gap-6 mb-6">
-          <div className="relative">
-            <Avatar
-              src={adminProfile.avatar}
-              alt="Avatar"
-              sx={{
-                width: 80,
-                height: 80,
-                border: "4px solid rgba(189, 133, 241, 0.2)",
-              }}
-            />
-            <label className="absolute bottom-0 right-0 w-8 h-8 cursor-pointer bg-gradient-to-br from-[#6d1db9] to-[#bd85f1] rounded-full flex items-center justify-center hover:scale-110 transition-transform">
-              <FaCamera className="text-white text-sm" />
-              <input
-                type="file"
-                accept="image/*"
-                hidden
-                onChange={handleFileChange}
+            {/* Avatar */}
+            <div className="flex items-center gap-6 mb-6">
+              <div className="relative">
+                <Avatar
+                  src={adminProfile.avatar}
+                  alt="Avatar"
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    border: "4px solid rgba(189, 133, 241, 0.2)",
+                  }}
+                />
+                <label className="absolute bottom-0 right-0 w-8 h-8 cursor-pointer bg-gradient-to-br from-[#6d1db9] to-[#bd85f1] rounded-full flex items-center justify-center hover:scale-110 transition-transform">
+                  <FaCamera className="text-white text-sm" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={handleFileChange}
+                  />
+                </label>
+              </div>
+
+              <div>
+                <p className="text-white font-display mb-1">Profile Picture</p>
+                <p className="text-sm text-[#99a1af] font-sans">
+                  Upload a new avatar for your admin account
+                </p>
+              </div>
+            </div>
+            {/* Inputs */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <TextField
+                fullWidth
+                label="Full Name"
+                value={adminProfile.name}
+                onChange={(e) =>
+                  setAdminProfile({
+                    ...adminProfile,
+                    name: e.target.value,
+                  })
+                }
+                sx={textFieldStyles}
               />
-            </label>
+
+              <TextField
+                fullWidth
+                label="Email Address"
+                value={adminProfile.email}
+                disabled
+                sx={textFieldStyles}
+              />
+
+              <TextField
+                fullWidth
+                label="Phone Number"
+                value={adminProfile.phone}
+                onChange={(e) =>
+                  setAdminProfile({
+                    ...adminProfile,
+                    phone: e.target.value,
+                  })
+                }
+                sx={textFieldStyles}
+              />
+            </div>{" "}
+            {/* Save */}
+            <div className="flex justify-end">
+              <Button
+                onClick={handleSave}
+                variant="contained"
+                startIcon={
+                  isUpdating ? <CircularProgress size={16} /> : <FaSave />
+                }
+                disabled={isUpdating}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  background: "linear-gradient(to right, #6d1db9, #bd85f1)",
+                  borderRadius: "12px",
+                  textTransform: "none",
+                  fontSize: "14px",
+                  boxShadow: "0 10px 40px rgba(109, 29, 185, 0.3)",
+                  "&:hover": {
+                    background: "linear-gradient(to right, #5b189b, #a66fd9)",
+                    transform: "scale(1.05)",
+                  },
+                  "&:disabled": {
+                    background: "rgba(109, 29, 185, 0.5)",
+                    color: "rgba(255, 255, 255, 0.5)",
+                  },
+                  transition: "all 0.3s",
+                }}
+              >
+                {isUpdating ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
           </div>
 
-          <div>
-            <p className="text-white font-display mb-1">Profile Picture</p>
-            <p className="text-sm text-[#99a1af] font-sans">
-              Upload a new avatar for your admin account
-            </p>
-          </div>
-        </div>
-        {/* Inputs */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <TextField
-            fullWidth
-            label="Full Name"
-            value={adminProfile.name}
-            onChange={(e) =>
-              setAdminProfile({
-                ...adminProfile,
-                name: e.target.value,
-              })
-            }
-            sx={textFieldStyles}
-          />
-
-          <TextField
-            fullWidth
-            label="Email Address"
-            value={adminProfile.email}
-            disabled
-            sx={textFieldStyles}
-          />
-
-          <TextField
-            fullWidth
-            label="Phone Number"
-            value={adminProfile.phone}
-            onChange={(e) =>
-              setAdminProfile({
-                ...adminProfile,
-                phone: e.target.value,
-              })
-            }
-            sx={textFieldStyles}
-          />
-        </div>{" "}
-        {/* Save */}
-        <div className="flex justify-end">
-          <Button
-            onClick={handleSave}
-            variant="contained"
-            startIcon={isUpdating ? <CircularProgress size={16} /> : <FaSave />}
-            disabled={isUpdating}
-            sx={{
-              px: 3,
-              py: 1,
-              background: "linear-gradient(to right, #6d1db9, #bd85f1)",
-              borderRadius: "12px",
-              textTransform: "none",
-              fontSize: "14px",
-              boxShadow: "0 10px 40px rgba(109, 29, 185, 0.3)",
-              "&:hover": {
-                background: "linear-gradient(to right, #5b189b, #a66fd9)",
-                transform: "scale(1.05)",
-              },
-              "&:disabled": {
-                background: "rgba(109, 29, 185, 0.5)",
-                color: "rgba(255, 255, 255, 0.5)",
-              },
-              transition: "all 0.3s",
-            }}
-          >
-            {isUpdating ? "Saving..." : "Save Changes"}
-          </Button>
-        </div>
-      </div>
-
-      {/* Security Settings */}
-      {/* <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 border border-white/10 rounded-3xl p-4">
+          {/* Security Settings */}
+          {/* <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 border border-white/10 rounded-3xl p-4">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 bg-[#bd85f1]/20 rounded-xl flex items-center justify-center">
             <FaLock className="text-[#bd85f1]" />

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   FaSearch,
   FaPlus,
@@ -10,88 +10,164 @@ import {
   FaTrash,
   FaCheckCircle,
 } from "react-icons/fa";
-import { Select, MenuItem, FormControl, Button } from "@mui/material";
-import { eventsData } from "../../../public/data/eventsData";
 import { FaX } from "react-icons/fa6";
+import {
+  Select,
+  MenuItem,
+  FormControl,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 import { EventManagementModal } from "../UI/EventManagementModal";
+import {
+  useGetAllEventsQuery,
+  useCreateEventMutation,
+  useUpdateEventMutation,
+  useDeleteEventMutation,
+} from "../../Redux/api/eventsApi";
+import { toast } from "sonner";
+import { getImageUrl } from "../../utils/baseUrl";
+import dayjs from "dayjs";
 
 export default function Events() {
-  const [events, setEvents] = useState(eventsData);
+  /* -------------------- API -------------------- */
+  const {
+    data: eventsResponse,
+    isLoading: isLoadingEvents,
+    isError,
+  } = useGetAllEventsQuery();
+
+  const [createEvent, { isLoading: isCreating }] = useCreateEventMutation();
+  const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation();
+  const [deleteEvent, { isLoading: isDeleting }] = useDeleteEventMutation();
+
+  const events = eventsResponse?.data?.data || [];
+  console.log("events", events);
+
+  /* -------------------- STATE -------------------- */
   const [searchQuery, setSearchQuery] = useState("");
-  const [eventStatusFilter, setEventStatusFilter] = useState("all");
-  const [dateFilter, setDateFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [startDateFilter, setStartDateFilter] = useState("");
+  const [endDateFilter, setEndDateFilter] = useState("");
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [eventsPage, setEventsPage] = useState(1);
+
+  const imageUrl = getImageUrl();
+
   const itemsPerPage = 5;
 
-  // Delete event
-  const onDeleteEvent = (id) => {
-    if (window.confirm("Are you sure you want to delete this event?")) {
-      setEvents(events.filter((e) => e.id !== id));
-    }
-  };
-
-  // Filtered & searched events
+  /* -------------------- FILTERING -------------------- */
   const filteredEvents = useMemo(() => {
     return events
       .filter((e) => e.title.toLowerCase().includes(searchQuery.toLowerCase()))
       .filter((e) =>
-        eventStatusFilter === "all"
-          ? true
-          : eventStatusFilter === "upcoming"
-          ? new Date(e.date) > new Date() && !e.cancelled
-          : eventStatusFilter === "completed"
-          ? new Date(e.date) <= new Date() && !e.cancelled
-          : e.cancelled
+        categoryFilter === "all" ? true : e.category === categoryFilter
       )
-      .filter((e) => (dateFilter ? e.date === dateFilter : true));
-  }, [events, searchQuery, eventStatusFilter, dateFilter]);
+      .filter((e) => {
+        const eventDate = new Date(e.eventDate);
+        const startDate = startDateFilter ? new Date(startDateFilter) : null;
+        const endDate = endDateFilter ? new Date(endDateFilter) : null;
+        
+        if (startDate && endDate) {
+          return eventDate >= startDate && eventDate <= endDate;
+        } else if (startDate) {
+          return eventDate >= startDate;
+        } else if (endDate) {
+          return eventDate <= endDate;
+        }
+        return true;
+      });
+  }, [events, searchQuery, categoryFilter, startDateFilter, endDateFilter]);
 
-  // Pagination
+  /* -------------------- PAGINATION -------------------- */
   const paginatedEvents = useMemo(() => {
     const start = (eventsPage - 1) * itemsPerPage;
     return filteredEvents.slice(start, start + itemsPerPage);
   }, [filteredEvents, eventsPage]);
 
-  // Reset page when filters/search change
-  useMemo(() => setEventsPage(1), []);
+  useEffect(() => {
+    setEventsPage(1);
+  }, [searchQuery, categoryFilter, startDateFilter, endDateFilter]);
 
-  // Pagination Component
-  const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-    const pages = [];
-    for (let i = 1; i <= totalPages; i++) pages.push(i);
-    return (
-      <div className="flex gap-2">
-        {pages.map((p) => (
+  /* -------------------- HANDLERS -------------------- */
+  const handleSaveEvent = async (eventData) => {
+    try {
+      if (editingEvent) {
+        await updateEvent({
+          id: editingEvent._id,
+          data: eventData,
+        }).unwrap();
+        toast.success("Event updated successfully!");
+      } else {
+        await createEvent(eventData).unwrap();
+        toast.success("Event created successfully!");
+      }
+
+      setEventModalOpen(false);
+      setEditingEvent(null);
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to save event");
+    }
+  };
+
+  const onDeleteEvent = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this event?")) return;
+
+    try {
+      await deleteEvent(id).unwrap();
+      toast.success("Event deleted successfully!");
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to delete event");
+    }
+  };
+
+  /* -------------------- PAGINATION UI -------------------- */
+  const Pagination = ({ currentPage, totalPages, onPageChange }) => (
+    <div className="flex gap-2">
+      {Array.from({ length: totalPages }).map((_, i) => {
+        const page = i + 1;
+        return (
           <button
-            key={p}
-            onClick={() => onPageChange(p)}
-            className={`px-3 py-1 rounded-lg ${
-              p === currentPage
+            key={page}
+            onClick={() => onPageChange(page)}
+            className={`px-3 py-1 rounded-lg cursor-pointer ${
+              page === currentPage
                 ? "bg-[#bd85f1] text-white"
                 : "bg-white/5 text-[#99a1af]"
             }`}
           >
-            {p}
+            {page}
           </button>
-        ))}
+        );
+      })}
+    </div>
+  );
+
+  if (isLoadingEvents) {
+    return (
+      <div className="flex justify-center items-center h-[92vh]">
+        <CircularProgress />
       </div>
     );
-  };
+  }
 
+  if (isError) {
+    return <p>Something went wrong</p>;
+  }
+
+  /* -------------------- RENDER -------------------- */
   return (
     <div className="space-y-6 h-screen bg-[#0a0d27] p-6 overflow-y-auto">
-      {/* Action Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Search + Add */}
+      <div className="flex flex-col sm:flex-row justify-between gap-4">
         <div className="relative flex-1 max-w-md">
-          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#99a1af]" />
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#99a1af]" />
           <input
-            type="text"
-            placeholder="Search events..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 h-12 bg-[#030a1d] border border-white/10 rounded-xl text-white placeholder:text-[#99a1af] focus:border-[#bd85f1] focus:ring-2 focus:ring-[#bd85f1]/20 transition-all font-sans"
+            placeholder="Search events..."
+            className="w-full pl-10 h-12 bg-[#030a1d] border border-white/10 rounded-xl text-white"
           />
         </div>
 
@@ -100,17 +176,13 @@ export default function Events() {
             setEditingEvent(null);
             setEventModalOpen(true);
           }}
-          className="bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] hover:from-[#5b189b] hover:to-[#a66fd9] text-white rounded-xl transition-all hover:scale-105 shadow-lg shadow-[#6d1db9]/30"
-          startIcon={<FaPlus className="text-sm" />}
+          startIcon={<FaPlus />}
           sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: "2px",
-            px: "20px",
-            py: "8px",
             textTransform: "none",
-            color: "white",
+            background: "linear-gradient(to right, #6d1db9, #bd85f1)",
+            color: "#fff",
             borderRadius: "12px",
+            px: 3,
           }}
         >
           Add Event
@@ -118,177 +190,187 @@ export default function Events() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3">
+      <div className="flex gap-3 flex-wrap">
         <FormControl size="small">
           <Select
-            value={eventStatusFilter}
-            onChange={(e) => setEventStatusFilter(e.target.value)}
-            displayEmpty
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
             sx={{
               backgroundColor: "rgba(255,255,255,0.05)",
               color: "#fff",
               borderRadius: "12px",
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "rgba(255,255,255,0.1)",
-              },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: "rgba(255,255,255,0.2)",
+              height: "56px",
+              minWidth: "180px",
+              "& .MuiSelect-select": {
+                paddingY: "14px",
               },
             }}
           >
-            <MenuItem value="all">All Events</MenuItem>
-            <MenuItem value="upcoming">Upcoming</MenuItem>
-            <MenuItem value="completed">Completed</MenuItem>
-            <MenuItem value="cancelled">Cancelled</MenuItem>
+            <MenuItem value="all">All Categories</MenuItem>
+            <MenuItem value="Concert">Concert</MenuItem>
+            <MenuItem value="Sports">Sports</MenuItem>
           </Select>
         </FormControl>
 
-        <div className="relative flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl">
-          <FaCalendarAlt className="w-4 h-4 text-[#99a1af]" />
-          <input
-            type="date"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="bg-transparent text-white font-sans text-sm focus:outline-none cursor-pointer"
-          />
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl opacity-0 group-hover:opacity-100 blur transition duration-300"></div>
+          <div className="relative flex items-center gap-3 bg-[#030a1d] border border-white/10 px-4 py-2.5 rounded-xl hover:border-purple-500/50 transition-all duration-300">
+            <FaCalendarAlt className="text-purple-400 text-lg" />
+            <div className="flex flex-col">
+              <label className="text-[#99a1af] text-xs mb-1">Start Date</label>
+              <input
+                type="date"
+                value={startDateFilter}
+                onChange={(e) => setStartDateFilter(e.target.value)}
+                className="bg-transparent text-white outline-none cursor-pointer"
+                style={{
+                  colorScheme: 'dark',
+                }}
+              />
+            </div>
+          </div>
         </div>
 
-        {(eventStatusFilter !== "all" || dateFilter) && (
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-xl opacity-0 group-hover:opacity-100 blur transition duration-300"></div>
+          <div className="relative flex items-center gap-3 bg-[#030a1d] border border-white/10 px-4 py-2.5 rounded-xl hover:border-pink-500/50 transition-all duration-300">
+            <FaCalendarAlt className="text-pink-400 text-lg" />
+            <div className="flex flex-col">
+              <label className="text-[#99a1af] text-xs mb-1">End Date</label>
+              <input
+                type="date"
+                value={endDateFilter}
+                onChange={(e) => setEndDateFilter(e.target.value)}
+                className="bg-transparent text-white outline-none cursor-pointer"
+                style={{
+                  colorScheme: 'dark',
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {(categoryFilter !== "all" || startDateFilter || endDateFilter) && (
           <Button
             onClick={() => {
-              setEventStatusFilter("all");
-              setDateFilter("");
+              setCategoryFilter("all");
+              setStartDateFilter("");
+              setEndDateFilter("");
             }}
-            sx={{
-              px: 2,
-              py: 1.5,
-              backgroundColor: "rgba(239,68,68,0.1)",
-              color: "#f87171",
-              "&:hover": { backgroundColor: "rgba(239,68,68,0.2)" },
-              borderRadius: "12px",
-            }}
-            startIcon={<FaX size={16} />}
+            startIcon={<FaX />}
+            sx={{ color: "#f87171" }}
           >
-            Clear Filters
+            Clear
           </Button>
         )}
       </div>
 
-      {/* Events List */}
+      {/* Loading / Error */}
+      {isLoadingEvents && (
+        <div className="flex justify-center py-10">
+          <CircularProgress />
+        </div>
+      )}
+
+      {isError && (
+        <p className="text-red-400 text-center">Failed to load events</p>
+      )}
+
+      {/* Events */}
       <div className="space-y-4">
         {paginatedEvents.map((event) => (
           <div
             key={event.id}
-            className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/95 backdrop-blur-xl border border-white/10 rounded-3xl p-6 hover:border-[#bd85f1]/30 transition-all"
+            className="border border-white/10 rounded-3xl p-6 bg-[#030a1d]"
           >
-            <div className="flex flex-col lg:flex-row items-start gap-6">
+            <div className="flex items-center gap-6">
               <img
-                src={event.imageUrl}
+                src={`${imageUrl}${event.thumbnail}`}
                 alt={event.title}
-                className="w-full lg:w-32 h-48 lg:h-32 rounded-2xl object-cover"
+                className="w-32 h-32 rounded-xl object-cover"
               />
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="text-xl text-white font-display mb-1">
-                      {event.title}
-                    </h3>
-                    <p className="text-[#bd85f1] font-sans mb-2">
-                      {event.category === "concert"
-                        ? event.artist
-                        : event.teams?.join(" vs ")}
-                    </p>
-                  </div>
-                  <span
-                    className={`px-3 py-1 rounded-lg text-xs font-sans flex items-center gap-1 ${
-                      event.cancelled
-                        ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                        : new Date(event.date) > new Date()
-                        ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                        : "bg-gray-500/10 text-gray-400 border border-gray-500/20"
-                    }`}
-                  >
-                    {event.cancelled ? (
-                      <>
-                        <FaBan size={12} /> Cancelled
-                      </>
-                    ) : new Date(event.date) > new Date() ? (
-                      <>
-                        <FaCheckCircle size={12} /> Upcoming
-                      </>
-                    ) : (
-                      <>
-                        <FaClock size={12} /> Completed
-                      </>
-                    )}
-                  </span>
-                </div>
+              <div className="flex-1">
+                <h3 className="text-xl text-white">{event.title}</h3>
+                <p className="text-[#bd85f1] mb-2">
+                  {event?.category === "Concert"
+                    ? event?.artistId?.name
+                    : event.category === "Sports"
+                    ? event?.teamId?.name
+                    : "N/A"}
+                </p>
 
-                <div className="flex flex-wrap gap-4 mb-4 text-sm text-[#99a1af] font-sans">
-                  <div className="flex items-center gap-2">
-                    <FaCalendarAlt className="w-4 h-4" />
-                    {new Date(event.date).toLocaleDateString()}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FaMapMarkerAlt className="w-4 h-4" />
-                    {event.venue}, {event.city}
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {event.ticketCategories.map((cat) => (
-                    <div
-                      key={cat.id}
-                      className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg"
-                    >
-                      <span className="text-xs text-white font-sans">
-                        {cat.name}:{" "}
-                        <span className="text-[#bd85f1]">
-                          {cat.availableQuantity}/{cat.totalQuantity}
-                        </span>
-                      </span>
-                    </div>
-                  ))}
+                <div className="flex gap-4 text-sm text-[#99a1af]">
+                  <p className="flex items-center gap-2">
+                    <FaCalendarAlt />{" "}
+                    <span>
+                      {dayjs(event.eventDate).format("MMM DD, YYYY  h:mm A")}
+                    </span>
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <FaMapMarkerAlt />
+                    <span>
+                      {event.venueName}, {event.city}
+                    </span>
+                  </p>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex lg:flex-col gap-2">
+              <div className="flex flex-col gap-2">
+                {/* Edit Button */}
                 <Button
                   onClick={() => {
                     setEditingEvent(event);
                     setEventModalOpen(true);
                   }}
+                  startIcon={<FaEdit size={14} />}
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
                     textTransform: "none",
-                    px: 4,
+                    px: 3,
                     py: 1,
-                    backgroundColor: "rgba(189,133,241,0.1)",
-                    color: "#bd85f1",
                     borderRadius: "12px",
-                    "&:hover": { backgroundColor: "rgba(189,133,241,0.2)" },
+                    color: "#bd85f1",
+                    backgroundColor: "rgba(189,133,241,0.12)",
+                    border: "1px solid rgba(189,133,241,0.25)",
+                    backdropFilter: "blur(6px)",
+                    transition: "all 0.25s ease",
+                    "&:hover": {
+                      backgroundColor: "rgba(189,133,241,0.22)",
+                      borderColor: "rgba(189,133,241,0.5)",
+                      transform: "translateY(-1px)",
+                    },
                   }}
-                  startIcon={<FaEdit size={16} />}
                 >
                   Edit
                 </Button>
+
+                {/* Delete Button */}
                 <Button
-                  onClick={() => onDeleteEvent(event.id)}
+                  color="error"
+                  onClick={() => onDeleteEvent(event._id)}
+                  startIcon={<FaTrash size={14} />}
+                  disabled={isDeleting}
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
                     textTransform: "none",
-                    px: 4,
+                    px: 3,
                     py: 1,
-                    backgroundColor: "rgba(239,68,68,0.1)",
-                    color: "#f87171",
                     borderRadius: "12px",
-                    "&:hover": { backgroundColor: "rgba(239,68,68,0.2)" },
+                    color: "#f87171",
+                    backgroundColor: "rgba(239,68,68,0.12)",
+                    border: "1px solid rgba(239,68,68,0.25)",
+                    backdropFilter: "blur(6px)",
+                    transition: "all 0.25s ease",
+                    "&:hover": {
+                      backgroundColor: "rgba(239,68,68,0.22)",
+                      borderColor: "rgba(239,68,68,0.5)",
+                      transform: "translateY(-1px)",
+                    },
+                    "&.Mui-disabled": {
+                      opacity: 0.5,
+                      color: "#fca5a5",
+                      borderColor: "rgba(239,68,68,0.15)",
+                    },
                   }}
-                  startIcon={<FaTrash size={16} />}
                 >
                   Delete
                 </Button>
@@ -300,7 +382,7 @@ export default function Events() {
 
       {/* Pagination */}
       {filteredEvents.length > itemsPerPage && (
-        <div className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/50 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden p-4 flex justify-center">
+        <div className="flex justify-center">
           <Pagination
             currentPage={eventsPage}
             totalPages={Math.ceil(filteredEvents.length / itemsPerPage)}
@@ -309,20 +391,16 @@ export default function Events() {
         </div>
       )}
 
+      {/* Modal */}
       <EventManagementModal
         event={editingEvent}
-        artists={eventsData.artist}
         isOpen={eventModalOpen}
+        isLoading={isCreating || isUpdating}
         onClose={() => {
           setEventModalOpen(false);
           setEditingEvent(null);
         }}
-        onSave={(eventData) => {
-          console.log("Event saved:", eventData);
-          // Here you would typically update your events state
-          setEventModalOpen(false);
-          setEditingEvent(null);
-        }}
+        onSave={handleSaveEvent}
       />
     </div>
   );

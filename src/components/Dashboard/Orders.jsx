@@ -14,13 +14,18 @@ import {
   FormControl,
   InputLabel,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import { FaSearch, FaEye } from "react-icons/fa";
-import { ordersData } from "../../../public/data/ordersData";
+// import { ordersData } from "../../../public/data/ordersData";
 import OrderDetailsModal from "../UI/OrderDetailsModal";
+import { useGetAllOrdersQuery } from "../../Redux/api/ordersApi";
 
 export default function Orders() {
-  const [orders] = useState(ordersData);
+  const { data: ordersResponse, isLoading } = useGetAllOrdersQuery();
+  const orders = ordersResponse?.data?.data || [];
+  console.log(orders);  
+  
   // const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOption, setSortOption] = useState("date");
@@ -45,32 +50,34 @@ export default function Orders() {
   };
 
   // Filter & sort orders
+  // Filter & sort orders
   const filteredOrders = useMemo(() => {
-    let data = orders;
+    let data = [...orders];
 
     // Status filter
     if (statusFilter !== "all") {
       data = data.filter((o) => o.status === statusFilter);
     }
 
-    // Search filter
-    // data = data.filter(
-    //   (o) =>
-    //     o.customerInfo.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    //     o.id.toLowerCase().includes(searchText.toLowerCase())
-    // );
-
     // Sorting
     if (sortOption === "date") {
-      data = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     } else if (sortOption === "amount") {
-      data = data.sort((a, b) => b.total - a.total);
+      data.sort((a, b) => (b.totalAmount || 0) - (a.totalAmount || 0));
     } else if (sortOption === "status") {
-      data = data.sort((a, b) => a.status.localeCompare(b.status));
+      data.sort((a, b) => a.status.localeCompare(b.status));
     }
 
     return data;
   }, [orders, statusFilter, sortOption]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[92vh]">
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 h-screen bg-[#0a0d27] p-6 overflow-y-auto">
@@ -134,12 +141,13 @@ export default function Orders() {
             }}
           >
             <MenuItem value="all">All Status</MenuItem>
-            <MenuItem value="confirmed">Confirmed</MenuItem>
+            <MenuItem value="paid">Paid</MenuItem>
             <MenuItem value="pending">Pending</MenuItem>
+            <MenuItem value="cancelled">Cancelled</MenuItem>
           </Select>
         </FormControl>
 
-        <FormControl
+        {/* <FormControl
           sx={{
             minWidth: 180,
             backgroundColor: "#030a1d",
@@ -234,7 +242,7 @@ export default function Orders() {
               Sort By Status
             </MenuItem>
           </Select>
-        </FormControl>
+        </FormControl> */}
       </div>
 
       {/* Orders Table */}
@@ -289,48 +297,71 @@ export default function Orders() {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((order) => (
                   <TableRow
-                    key={order.id}
+                    key={order._id}
                     hover
                     sx={{ "&:hover": { bgcolor: "rgba(255,255,255,0.05)" } }}
                   >
-                    <TableCell sx={{ color: "white" }}>#{order.id}</TableCell>
+                    <TableCell sx={{ color: "white" }}>{order.orderCode}</TableCell>
                     <TableCell sx={{ color: "white" }}>
                       <div>
-                        <p> {order.customerInfo.name}</p>
+                        <p>{order.userId?.fullName || "N/A"}</p>
                         <p className="text-[#99a1af] text-xs">
-                          {" "}
-                          {order.customerInfo.email}
+                          {order.userId?.email || "N/A"}
                         </p>
                       </div>
                     </TableCell>
                     <TableCell sx={{ color: "#99a1af" }}>
-                      {order.eventTitle}
+                      {order.eventId?.title || "Unknown Event"}
                     </TableCell>
                     <TableCell sx={{ color: "#99a1af" }}>
                       {new Date(order.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      <Chip
-                        label={order.status}
-                        size="small"
-                        sx={{
-                          color:
-                            order.status === "confirmed"
-                              ? "#16a34a"
-                              : "#ca8a04",
-                          bgcolor:
-                            order.status === "confirmed"
-                              ? "rgba(22,163,74,0.1)"
-                              : "rgba(202,138,4,0.1)",
-                          border:
-                            order.status === "confirmed"
-                              ? "1px solid rgba(22,163,74,0.2)"
-                              : "1px solid rgba(202,138,4,0.2)",
-                        }}
-                      />
+                      {(() => {
+                        const getStatusColor = (status) => {
+                          switch (status) {
+                            case "confirmed":
+                            case "paid":
+                              return {
+                                color: "#16a34a",
+                                bgcolor: "rgba(22,163,74,0.1)",
+                                border: "1px solid rgba(22,163,74,0.2)",
+                              };
+                            case "pending":
+                              return {
+                                color: "#ca8a04",
+                                bgcolor: "rgba(202,138,4,0.1)",
+                                border: "1px solid rgba(202,138,4,0.2)",
+                              };
+                            case "cancelled":
+                              return {
+                                color: "#ef4444",
+                                bgcolor: "rgba(239,68,68,0.1)",
+                                border: "1px solid rgba(239,68,68,0.2)",
+                              };
+                            default:
+                              return {
+                                color: "#3b82f6",
+                                bgcolor: "rgba(59,130,246,0.1)",
+                                border: "1px solid rgba(59,130,246,0.2)",
+                              };
+                          }
+                        };
+                        const styles = getStatusColor(order.status);
+                        return (
+                          <Chip
+                            label={order.status}
+                            size="small"
+                            sx={{
+                              ...styles,
+                              textTransform: "capitalize",
+                            }}
+                          />
+                        );
+                      })()}
                     </TableCell>
                     <TableCell sx={{ color: "white" }} align="right">
-                      ${order.total.toFixed(2)}
+                      ${order.totalAmount?.toFixed(2)}
                     </TableCell>
                     <TableCell align="center">
                       <Button

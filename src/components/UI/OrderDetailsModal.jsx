@@ -21,11 +21,13 @@ import { IoClose } from "react-icons/io5";
 export default function OrderDetailModal({ order, isOpen, onClose }) {
   if (!order) return null;
 
-  const subtotal = order.items.reduce((sum, item) => sum + item.totalPrice, 0);
-  const platformFee = order.total * 0.05;
-
   const statusColors = {
     confirmed: {
+      bg: "rgba(16,185,129,0.25)",
+      text: "#4CAF0f",
+      border: "rgba(16,185,129,0.2)",
+    },
+    paid: {
       bg: "rgba(16,185,129,0.25)",
       text: "#4CAF0f",
       border: "rgba(16,185,129,0.2)",
@@ -43,6 +45,12 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
   };
 
   const currentStatus = statusColors[order.status] || statusColors.other;
+
+  const formattedAddress = order.address
+    ? `${order.address.line1 || ""}, ${order.address.line2 || ""} ${
+        order.address.city || ""
+      } ${order.address.zip || ""}, ${order.address.country || ""}`
+    : "N/A";
 
   return (
     <Modal open={isOpen} onClose={onClose}>
@@ -78,7 +86,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
             Order Details
           </Typography>
           <Typography variant="body2" color="#99a1af">
-            Order #{order.id} - {new Date(order.createdAt).toLocaleDateString()}
+            Order #{order.orderCode} - {new Date(order.createdAt).toLocaleDateString()}
           </Typography>
         </div>
 
@@ -113,7 +121,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
               <Typography variant="caption" color="#99a1af">
                 Full Name
               </Typography>
-              <Typography>{order.customerInfo.name}</Typography>
+              <Typography>{order.userId?.fullName || "N/A"}</Typography>
             </div>
             <div>
               <Typography variant="caption" color="#99a1af">
@@ -121,7 +129,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
               </Typography>
               <Stack direction="row" alignItems="center" spacing={1}>
                 <FaMailBulk />
-                <Typography>{order.customerInfo.email}</Typography>
+                <Typography>{order.userId?.email || "N/A"}</Typography>
               </Stack>
             </div>
 
@@ -131,7 +139,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
               </Typography>
               <Stack direction="row" alignItems="center" spacing={1}>
                 <FaPhone />
-                <Typography>{order.customerInfo.phone}</Typography>
+                <Typography>{order.contact?.phone || order.userId?.phone || "N/A"}</Typography>
               </Stack>
             </div>
 
@@ -139,7 +147,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
               <Typography variant="caption" color="#99a1af">
                 User ID
               </Typography>
-              <Typography>{order.userId}</Typography>
+              <Typography>{order.userId?._id || "N/A"}</Typography>
             </div>
           </div>
         </div>
@@ -157,10 +165,10 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
           <Stack direction="row" alignItems="center" spacing={1} mb={1}>
             <FaHome className="w-5 h-5 text-[#bd85f1]" />
             <p className="text-white font-display mb-4 flex items-center gap-2 text-2xl font-krona">
-              Delivery Address
+              Billing/Delivery Address
             </p>
           </Stack>
-          <p className="text-white mt-1">{order.customerInfo.address}</p>
+          <p className="text-white mt-1">{formattedAddress}</p>
         </Paper>
 
         {/* Event Details */}
@@ -180,36 +188,33 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
             </p>
           </Stack>
           <p className="text-[#99a1af] uppercase">Event Name</p>
-          <p className="text-lg text-white font-medium">{order.eventTitle}</p>
+          <p className="text-lg text-white font-medium">{order.eventId?.title || "Unknown Event"}</p>
           <p className="text-[#99a1af] py-2">Tickets:</p>
 
-          {order.items.map((item, index) => (
-            <Paper
-              key={index}
-              sx={{
-                p: 1,
-                mb: 1,
-                borderRadius: 1,
-                bgcolor: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.05)",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <div>
-                <p className="text-white">{item.categoryName}</p>
-                <Typography variant="caption" color="#99a1af">
-                  Quantity: {item.quantity}
-                </Typography>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <p className="text-white font-medium">${item.totalPrice}</p>
-                <Typography variant="caption" color="#99a1af">
-                  ${item.unitPrice} each
-                </Typography>
-              </div>
-            </Paper>
-          ))}
+          <Paper
+            sx={{
+              p: 1,
+              mb: 1,
+              borderRadius: 1,
+              bgcolor: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.05)",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>
+              <p className="text-white">Ticket</p>
+              <Typography variant="caption" color="#99a1af">
+                Quantity: {order.quantity}
+              </Typography>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <p className="text-white font-medium">${order.subtotalAmount?.toFixed(2)}</p>
+              <Typography variant="caption" color="#99a1af">
+                ${(order.subtotalAmount / order.quantity)?.toFixed(2)} each
+              </Typography>
+            </div>
+          </Paper>
         </Paper>
 
         {/* Payment Summary */}
@@ -231,11 +236,11 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
           <Stack spacing={1}>
             <Stack direction="row" justifyContent="space-between">
               <Typography color="#99a1af">Subtotal</Typography>
-              <p className="text-white">${subtotal.toFixed(2)}</p>
+              <p className="text-white">${order.subtotalAmount?.toFixed(2)}</p>
             </Stack>
             <Stack direction="row" justifyContent="space-between">
-              <Typography color="#99a1af">Platform Fee</Typography>
-              <p className="text-white">${platformFee.toFixed(2)}</p>
+              <Typography color="#99a1af">Service Fee</Typography>
+              <p className="text-white">${order.serviceFee?.toFixed(2)}</p>
             </Stack>
             <Divider sx={{ bgcolor: "rgba(255,255,255,0.1)", my: 1 }} />
             <Stack
@@ -245,7 +250,7 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
             >
               <p className="text-white">Total Amount</p>
               <p className="text-2xl text-[#bd85f1] font-display">
-                ${order.total.toFixed(2)}
+                ${order.totalAmount?.toFixed(2)}
               </p>
             </Stack>
           </Stack>

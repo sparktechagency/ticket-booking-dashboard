@@ -203,6 +203,7 @@ export function EventManagementModal({
   };
 
   const handleSave = () => {
+    // Basic required field validation
     if (
       !formData.title ||
       !formData.date ||
@@ -212,10 +213,13 @@ export function EventManagementModal({
       toast.warning("Please fill in all required fields.");
       return;
     }
-    if (!formData.imageUrl) {
+    
+    // Image is only required for new events, not for updates
+    if (!event && !formData.imageUrl) {
       toast.warning("Please upload an event thumbnail.");
       return;
     }
+    
     if (formData.ticketsAvailable) {
       const invalid = formData.ticketCategories.some(
         (c) => !c.name || c.basePrice <= 0 || c.totalQuantity <= 0
@@ -239,7 +243,41 @@ export function EventManagementModal({
       return;
     }
 
-    onSave(formData);
+    // For updates, only send fields that have changed or files that were uploaded
+    const dataToSend = new FormData();
+    
+    // Always include basic fields
+    dataToSend.append("title", formData.title);
+    dataToSend.append("date", formData.date);
+    dataToSend.append("time", formData.time);
+    dataToSend.append("venue", formData.venue);
+    dataToSend.append("city", formData.city);
+    dataToSend.append("category", formData.category);
+    dataToSend.append("description", formData.description);
+    
+    // Add optional fields
+    if (formData.location) dataToSend.append("location", formData.location);
+    if (formData.artistId) dataToSend.append("artistId", formData.artistId);
+    if (formData.teams && formData.teams.length > 0) {
+      dataToSend.append("teams", JSON.stringify(formData.teams));
+    }
+    
+    // Only append image if a new file was uploaded
+    if (formData.imageFile) {
+      dataToSend.append("thumbnail", formData.imageFile);
+    }
+    
+    // Only append seating chart if a new file was uploaded
+    if (formData.seatingChartFile) {
+      dataToSend.append("seatingChart", formData.seatingChartFile);
+    }
+    
+    // Add ticket categories
+    if (formData.ticketsAvailable && formData.ticketCategories.length > 0) {
+      dataToSend.append("ticketCategories", JSON.stringify(formData.ticketCategories));
+    }
+
+    onSave(dataToSend);
     onClose();
   };
 
