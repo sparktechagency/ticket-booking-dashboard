@@ -1,21 +1,35 @@
 import { useState, useMemo } from "react";
-import { Button, TablePagination } from "@mui/material";
+import { Button, TablePagination, CircularProgress } from "@mui/material";
 import {
   FaEdit,
   FaTrash,
   FaPlus,
   FaSearch,
-  FaFilter,
   FaTicketAlt,
-  FaStar,
 } from "react-icons/fa";
+import { toast } from "sonner";
 
 import { ArtistManagementModal } from "../UI/ArtistManagementModal";
-import { artistsData } from "../../../public/data/artistData";
+// import { artistsData } from "../../../public/data/artistData";
 import { DeleteConfirmationModal } from "../UI/DeleteConfirmationModal";
+import {
+  useGetAllArtistsQuery,
+  useCreateArtistMutation,
+  useUpdateArtistMutation,
+  useDeleteArtistMutation,
+} from "../../Redux/api/artistApi";
+import { getImageUrl } from "../../utils/baseUrl";
 
 export default function Artists() {
-  const [artists, setArtists] = useState(artistsData);
+  const { data: artistsResponse, isLoading, isError } = useGetAllArtistsQuery();
+  const [createArtist, { isLoading: isCreating }] = useCreateArtistMutation();
+  const [updateArtist, { isLoading: isUpdating }] = useUpdateArtistMutation();
+  const [deleteArtist, { isLoading: isDeleting }] = useDeleteArtistMutation();
+
+  const artists = artistsResponse?.data?.data || [];
+  console.log(artists);
+  const imageUrl = getImageUrl();
+
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
@@ -33,14 +47,58 @@ export default function Artists() {
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
+
   const confirmDelete = (artist) => {
     setDeleteTarget(artist);
   };
 
-  const handleDeleteConfirmed = () => {
-    setArtists((prev) => prev.filter((a) => a.id !== deleteTarget.id));
-    setDeleteTarget(null);
+  const handleDeleteConfirmed = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteArtist(deleteTarget.id || deleteTarget._id).unwrap();
+      toast.success("Artist deleted successfully!");
+      setDeleteTarget(null);
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error(error?.data?.message || "Failed to delete artist");
+    }
   };
+
+  const handleSaveArtist = async (artistFormData) => {
+    try {
+      if (editingArtist) {
+        await updateArtist({
+          id: editingArtist.id || editingArtist._id,
+          data: artistFormData,
+        }).unwrap();
+        toast.success("Artist updated successfully!");
+      } else {
+        await createArtist(artistFormData).unwrap();
+        toast.success("Artist created successfully!");
+      }
+      setArtistModalOpen(false);
+      setEditingArtist(null);
+    } catch (error) {
+      console.error("Save error:", error);
+      toast.error(error?.data?.message || "Failed to save artist");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[92vh]">
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex justify-center items-center h-[92vh]">
+        <p className="text-white">Something went wrong while loading artists.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 h-screen bg-[#0a0d27] p-6 overflow-y-auto">
@@ -50,7 +108,10 @@ export default function Artists() {
           <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#99a1af]" />
           <input
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(0);
+            }}
             placeholder="Search artists..."
             className="w-full pl-10 pr-4 h-12 bg-[#030a1d] border border-white/10 rounded-xl text-white placeholder:text-[#99a1af]"
           />
@@ -86,14 +147,17 @@ export default function Artists() {
       <div className="space-y-4">
         {paginatedArtists.map((artist) => (
           <div
-            key={artist.id}
+            key={artist.id || artist._id}
             className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/60 border border-white/10 rounded-3xl p-6"
           >
             <div className="flex flex-col lg:flex-row gap-6">
               <img
-                src={artist.imageUrl}
+                src={artist.image ? `${imageUrl}${artist.image}` : "https://via.placeholder.com/400?text=No+Image"}
                 alt={artist.name}
                 className="w-full lg:w-32 h-48 lg:h-32 rounded-2xl object-cover"
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/400?text=No+Image";
+                }}
               />
 
               <div className="flex-1">
@@ -128,7 +192,8 @@ export default function Artists() {
 
                 <button
                   onClick={() => confirmDelete(artist)}
-                  className="px-4 py-2 bg-red-500/10 text-red-400 rounded-xl flex items-center gap-2 cursor-pointer"
+                  disabled={isDeleting}
+                  className="px-4 py-2 bg-red-500/10 text-red-400 rounded-xl flex items-center gap-2 cursor-pointer disabled:opacity-50"
                 >
                   <FaTrash />
                   Delete
@@ -137,6 +202,13 @@ export default function Artists() {
             </div>
           </div>
         ))}
+         {paginatedArtists.length === 0 && (
+          <div className="text-center text-[#99a1af] py-10">
+             {searchQuery 
+              ? `No artists found matching "${searchQuery}"`
+              : "No artists found. Add your first artist!"}
+          </div>
+        )}
       </div>
 
       {/* Pagination */}
@@ -166,20 +238,7 @@ export default function Artists() {
           setArtistModalOpen(false);
           setEditingArtist(null);
         }}
-        onSave={(artistData) => {
-          if (editingArtist) {
-            setArtists((prev) =>
-              prev.map((a) =>
-                a.id === editingArtist.id ? { ...a, ...artistData } : a
-              )
-            );
-          } else {
-            setArtists((prev) => [...prev, { ...artistData, id: Date.now() }]);
-          }
-
-          setArtistModalOpen(false);
-          setEditingArtist(null);
-        }}
+        onSave={handleSaveArtist}
       />
 
       {/* delete confirmation modal */}

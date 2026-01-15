@@ -9,20 +9,17 @@ const GENRE_OPTIONS = [
   "Rock",
   "Hip-Hop",
   "R&B",
+  "Country",
   "Electronic",
   "Jazz",
   "Classical",
-  "Country",
   "Reggae",
-  "Latin",
-  "K-Pop",
-  "Indie",
-  "Alternative",
-  "Metal",
-  "Folk",
-  "Blues",
-  "Other",
 ];
+
+
+import { getImageUrl } from "../../utils/baseUrl";
+
+// ... (KEEP GENRE_OPTIONS)
 
 export function ArtistManagementModal({ artist, isOpen, onClose, onSave }) {
   const [formData, setFormData] = useState({
@@ -30,16 +27,12 @@ export function ArtistManagementModal({ artist, isOpen, onClose, onSave }) {
     genre: "",
     bio: "",
     imageUrl: "",
-    socialLinks: {
-      instagram: "",
-      twitter: "",
-      facebook: "",
-      website: "",
-    },
-    verified: false,
+    imageFile: null,
+    verified: true
   });
 
   const [imagePreview, setImagePreview] = useState("");
+  const imageUrlBase = getImageUrl();
 
   useEffect(() => {
     if (artist) {
@@ -47,33 +40,25 @@ export function ArtistManagementModal({ artist, isOpen, onClose, onSave }) {
         name: artist.name || "",
         genre: artist.genre || "",
         bio: artist.bio || "",
-        imageUrl: artist.imageUrl || "",
-        socialLinks: {
-          instagram: artist.socialLinks?.instagram || "",
-          twitter: artist.socialLinks?.twitter || "",
-          facebook: artist.socialLinks?.facebook || "",
-          website: artist.socialLinks?.website || "",
-        },
-        verified: artist.verified || false,
+        imageUrl: artist.image || artist.imageUrl || "",
+        imageFile: null,
+        verified: artist.verified || true,
       });
-      setImagePreview(artist.imageUrl || "");
+      // Construct preview URL
+      const imgPath = artist.image || artist.imageUrl;
+      setImagePreview(imgPath ? (imgPath.startsWith("http") ? imgPath : `${imageUrlBase}${imgPath}`) : "");
     } else {
       setFormData({
         name: "",
         genre: "",
         bio: "",
         imageUrl: "",
-        socialLinks: {
-          instagram: "",
-          twitter: "",
-          facebook: "",
-          website: "",
-        },
-        verified: false,
+        imageFile: null,
+        verified: true,
       });
       setImagePreview("");
     }
-  }, [artist, isOpen]);
+  }, [artist, isOpen, imageUrlBase]);
 
   if (!isOpen) return null;
 
@@ -98,11 +83,27 @@ export function ArtistManagementModal({ artist, isOpen, onClose, onSave }) {
       toast.warning("Artist name and genre are required");
       return;
     }
-    if (!formData.imageUrl) {
+    if (!artist && !formData.imageFile) {
       toast.warning("Please upload an artist image");
       return;
     }
-    onSave(formData);
+
+    const dataToSend = new FormData();
+    
+    const data = {
+      name: formData.name,
+      genre: formData.genre,
+      bio: formData.bio,
+      isVertified: true,
+    };
+
+    dataToSend.append("data", JSON.stringify(data));
+
+    if (formData.imageFile) {
+      dataToSend.append("image", formData.imageFile);
+    }
+
+    onSave(dataToSend);
   };
 
   const purpleFieldClass =
