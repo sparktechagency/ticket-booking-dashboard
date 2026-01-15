@@ -22,10 +22,10 @@ export default function OrderDetailModal({ order, isOpen, onClose }) {
   if (!order) return null;
 
   const statusColors = {
-    confirmed: {
-      bg: "rgba(16,185,129,0.25)",
-      text: "#4CAF0f",
-      border: "rgba(16,185,129,0.2)",
+    cancelled: {
+      bg: "rgba(224, 126, 126, 1)",
+      text: "#b80707ff",
+      border: "rgba(184, 68, 2, 0.2)",
     },
     paid: {
       bg: "rgba(16,185,129,0.25)",
