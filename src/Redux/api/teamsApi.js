@@ -42,7 +42,8 @@ const teamsApi = baseApi.injectEndpoints({
     createTeam: builder.mutation({
       query: (data) => {
         const accessToken = sessionStorage.getItem("accessToken");
-        console.log({ accessToken, teamData: data });
+        console.log({ accessToken });
+        console.log(data);
 
         return {
           url: "/teams",

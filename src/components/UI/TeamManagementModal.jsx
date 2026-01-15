@@ -3,19 +3,19 @@ import { useEffect, useState } from "react";
 import { FaTimes, FaSave, FaUpload, FaCheckCircle } from "react-icons/fa";
 import { MdDeleteForever } from "react-icons/md";
 import { toast } from "sonner";
+import { getImageUrl } from "../../utils/baseUrl";
 
 const GENRE_OPTIONS = [
   "Football",
-  "Basketball",
-  "Baseball",
-  "Soccer",
-  "Hockey",
   "Cricket",
-  "Rugby",
+  "Basketball",
   "Tennis",
+  "Baseball",
+  "Hockey",
+  "Rugby",
   "Volleyball",
-  "American Football",
-  "Other",
+  "Swimming",
+  "Athletics",
 ];
 
 export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }) {
@@ -23,14 +23,14 @@ export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }
     name: "",
     genre: "",
     bio: "",
-    image: "",
     imageFile: null,
-    thumbnail: "",
     thumbnailFile: null,
   });
 
   const [imagePreview, setImagePreview] = useState("");
   const [thumbnailPreview, setThumbnailPreview] = useState("");
+
+  const imageUrl = getImageUrl();
 
   useEffect(() => {
     if (team) {
@@ -38,27 +38,24 @@ export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }
         name: team.name || "",
         genre: team.genre || "",
         bio: team.bio || "",
-        image: team.image || "",
         imageFile: null,
-        thumbnail: team.thumbnail || "",
         thumbnailFile: null,
       });
-      setImagePreview(team.image || "");
-      setThumbnailPreview(team.thumbnail || "");
+      // Use full URL for existing images
+      setImagePreview(team.image ? `${imageUrl}${team.image}` : "");
+      setThumbnailPreview(team.thumbnail ? `${imageUrl}${team.thumbnail}` : "");
     } else {
       setFormData({
         name: "",
         genre: "",
         bio: "",
-        image: "",
         imageFile: null,
-        thumbnail: "",
         thumbnailFile: null,
       });
       setImagePreview("");
       setThumbnailPreview("");
     }
-  }, [team, isOpen]);
+  }, [team, isOpen, imageUrl]);
 
   if (!isOpen) return null;
 
@@ -66,12 +63,17 @@ export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file size (3MB)
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("Image size must be less than 3MB");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result);
       setFormData((prev) => ({
         ...prev,
-        image: reader.result,
         imageFile: file,
       }));
     };
@@ -82,12 +84,17 @@ export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file size (3MB)
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("Thumbnail size must be less than 3MB");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setThumbnailPreview(reader.result);
       setFormData((prev) => ({
         ...prev,
-        thumbnail: reader.result,
         thumbnailFile: file,
       }));
     };
@@ -95,27 +102,32 @@ export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }
   };
 
   const handleSave = () => {
+    // Validate required fields
     if (!formData.name || !formData.genre) {
       toast.warning("Team name and genre are required");
       return;
     }
     
     // Image is only required for new teams
-    if (!team && !formData.image) {
+    if (!team && !formData.imageFile) {
       toast.warning("Please upload a team logo");
       return;
     }
 
-    console.log(formData);
+console.log(formData);
 
     // Create FormData for file upload
     const dataToSend = new FormData();
-    dataToSend.append("name", formData.name);
-    dataToSend.append("genre", formData.genre);
-    dataToSend.append("bio", formData.bio);
-    dataToSend.append("image", formData.image);
-    dataToSend.append("thumbnail", formData.thumbnail);
-    
+
+    const data  = {
+      name: formData.name,
+      genre: formData.genre,
+      bio: formData.bio,
+       isVertified: true,
+    }
+
+    console.log(data);
+  dataToSend.append("data", JSON.stringify(data));
     // Only append image if a new file was uploaded
     if (formData.imageFile) {
       dataToSend.append("image", formData.imageFile);
@@ -133,10 +145,6 @@ export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }
     "w-full px-4 py-3 bg-[#030a1d] text-white rounded-xl border border-purple-500/30 " +
     "focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/30 " +
     "hover:border-purple-400/60 transition";
-
-  // ... (existing helper functions)
-
-  // ...
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
@@ -172,7 +180,7 @@ export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }
               </label>
 
               <div className="flex gap-4 flex-wrap">
-                <div className="w-48 h-48 bg-[#030a1d] border-2 border-dashed border-purple-500/30 rounded-2xl overflow-hidden relative group group-hover:border-purple-400/60 transition">
+                <div className="w-48 h-48 bg-[#030a1d] border-2 border-dashed border-purple-500/30 rounded-2xl overflow-hidden relative group hover:border-purple-400/60 transition">
                   {imagePreview ? (
                     <img
                       src={imagePreview}
@@ -202,7 +210,6 @@ export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }
                           setImagePreview("");
                           setFormData((prev) => ({
                             ...prev,
-                            image: "",
                             imageFile: null,
                           }));
                         }}
@@ -237,10 +244,10 @@ export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }
               </label>
 
               <div className="flex gap-4 flex-wrap">
-                <div className="w-48 h-48 bg-[#030a1d] border-2 border-dashed border-purple-500/30 rounded-2xl overflow-hidden relative group group-hover:border-purple-400/60 transition">
-                  {formData.thumbnail ? (
+                <div className="w-48 h-48 bg-[#030a1d] border-2 border-dashed border-purple-500/30 rounded-2xl overflow-hidden relative group hover:border-purple-400/60 transition">
+                  {thumbnailPreview ? (
                     <img
-                      src={formData.thumbnail}
+                      src={thumbnailPreview}
                       alt="Thumbnail Preview"
                       className="w-full h-full object-cover"
                     />
@@ -258,7 +265,7 @@ export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
 
-                  {formData.thumbnail && (
+                  {thumbnailPreview && (
                     <div className="absolute bottom-2 right-2 flex gap-2">
                       <button
                         onClick={(e) => {
@@ -266,7 +273,6 @@ export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }
                           setThumbnailPreview("");
                           setFormData((prev) => ({
                             ...prev,
-                            thumbnail: "",
                             thumbnailFile: null,
                           }));
                         }}
@@ -354,6 +360,7 @@ export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }
               },
             }}
             onClick={onClose}
+            disabled={isLoading}
           >
             Cancel
           </Button>
@@ -377,7 +384,7 @@ export function TeamManagementModal({ team, isOpen, onClose, onSave, isLoading }
             disabled={isLoading}
           >
             <FaSave />
-            {team ? "Update Team" : "Create Team"}
+            {isLoading ? "Saving..." : (team ? "Update Team" : "Create Team")}
           </Button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Button, TablePagination, CircularProgress } from "@mui/material";
-import { FaEdit, FaTrash, FaPlus, FaSearch, FaRunning } from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus, FaSearch } from "react-icons/fa";
 
 import { TeamManagementModal } from "../UI/TeamManagementModal";
 import { DeleteConfirmationModal } from "../UI/DeleteConfirmationModal";
@@ -15,14 +15,13 @@ import { getImageUrl } from "../../utils/baseUrl";
 
 export default function Teams() {
   /* -------------------- API -------------------- */
-  const { data: teamsResponse, isLoading, isError,refetch } = useGetAllTeamsQuery();
+  const { data: teamsResponse, isLoading, isError } = useGetAllTeamsQuery();
   const [deleteTeam, { isLoading: isDeleting }] = useDeleteTeamMutation();
   const [createTeam, { isLoading: isCreating }] = useCreateTeamMutation();
   const [updateTeam, { isLoading: isUpdating }] = useUpdateTeamMutation();
 
   const teams = teamsResponse?.data?.data || [];
-  console.log("teams", teams);
-
+  console.log(teams);
   const imageUrl = getImageUrl();
 
   /* -------------------- STATE -------------------- */
@@ -54,13 +53,32 @@ export default function Teams() {
   const handleDeleteConfirmed = async () => {
     if (!deleteTarget) return;
     try {
-      const deleteResponse = await deleteTeam(deleteTarget.id || deleteTarget._id).unwrap();
-      console.log("deleteResponse", deleteResponse);
+      await deleteTeam(deleteTarget.id || deleteTarget._id).unwrap();
       toast.success("Team deleted successfully!");
       setDeleteTarget(null);
     } catch (error) {
-      console.log("error", error);
+      console.error("Delete error:", error);
       toast.error(error?.data?.message || "Failed to delete team");
+    }
+  };
+
+  const handleSaveTeam = async (teamFormData) => {
+    try {
+      if (editingTeam) {
+        await updateTeam({
+          id: editingTeam.id || editingTeam._id,
+          data: teamFormData,
+        }).unwrap();
+        toast.success("Team updated successfully!");
+      } else {
+        await createTeam(teamFormData).unwrap();
+        toast.success("Team created successfully!");
+      }
+      setTeamModalOpen(false);
+      setEditingTeam(null);
+    } catch (error) {
+      console.error("Save error:", error);
+      toast.error(error?.data?.message || "Failed to save team");
     }
   };
 
@@ -75,7 +93,9 @@ export default function Teams() {
 
   if (isError) {
     return (
-      <p className="text-white">Something went wrong while loading teams.</p>
+      <div className="flex justify-center items-center h-[92vh]">
+        <p className="text-white">Something went wrong while loading teams.</p>
+      </div>
     );
   }
 
@@ -87,7 +107,10 @@ export default function Teams() {
           <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#99a1af]" />
           <input
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setPage(0); // Reset to first page when searching
+            }}
             placeholder="Search teams..."
             className="w-full pl-10 pr-4 h-12 bg-[#030a1d] border border-white/10 rounded-xl text-white placeholder:text-[#99a1af]"
           />
@@ -131,11 +154,17 @@ export default function Teams() {
                 src={`${imageUrl}${team?.image}`}
                 alt={team.name}
                 className="w-full lg:w-32 h-48 lg:h-32 rounded-2xl object-cover"
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/400?text=No+Image";
+                }}
               />
 
               <div className="flex-1">
                 <h3 className="text-xl text-white font-display">{team.name}</h3>
                 <p className="text-[#bd85f1] mb-2">{team.genre}</p>
+                {team.bio && (
+                  <p className="text-[#99a1af] text-sm line-clamp-2">{team.bio}</p>
+                )}
               </div>
 
               <div className="flex lg:flex-col gap-2">
@@ -153,7 +182,7 @@ export default function Teams() {
                 <button
                   onClick={() => confirmDelete(team)}
                   disabled={isDeleting}
-                  className="px-4 py-2 bg-red-500/10 text-red-400 rounded-xl flex items-center gap-2 cursor-pointer transition hover:bg-red-500/20"
+                  className="px-4 py-2 bg-red-500/10 text-red-400 rounded-xl flex items-center gap-2 cursor-pointer transition hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <FaTrash />
                   Delete
@@ -165,7 +194,9 @@ export default function Teams() {
 
         {paginatedTeams.length === 0 && (
           <div className="text-center text-[#99a1af] py-10">
-            No teams found. Add your first team!
+            {searchQuery 
+              ? `No teams found matching "${searchQuery}"`
+              : "No teams found. Add your first team!"}
           </div>
         )}
       </div>
@@ -200,31 +231,10 @@ export default function Teams() {
           setTeamModalOpen(false);
           setEditingTeam(null);
         }}
-        onSave={async (teamFormData) => {
-          try {
-            if (editingTeam) {
-              const updateResponse = await updateTeam({
-                id: editingTeam.id || editingTeam._id,
-                data: teamFormData,
-              }).unwrap();
-              console.log("updateResponse", updateResponse);
-              toast.success("Team updated successfully!");
-              refetch()
-            } else {
-              const createResponse = await createTeam(teamFormData).unwrap();
-              console.log("createResponse", createResponse);
-              toast.success("Team created successfully!");
-            }
-            setTeamModalOpen(false);
-            setEditingTeam(null);
-          } catch (error) {
-            console.log("error", error);
-            toast.error(error?.data?.message || "Failed to save team");
-          }
-        }}
+        onSave={handleSaveTeam}
       />
 
-      {/* delete confirmation modal */}
+      {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         open={Boolean(deleteTarget)}
         title="Delete Team"
