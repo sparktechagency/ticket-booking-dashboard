@@ -42,7 +42,8 @@ const eventsApi = baseApi.injectEndpoints({
     createEvent: builder.mutation({
       query: (data) => {
         const accessToken = sessionStorage.getItem("accessToken");
-        console.log({ accessToken, eventData: data });
+        console.log({ accessToken });
+        console.log("data", data);
 
         return {
           url: "/events",
@@ -61,7 +62,8 @@ const eventsApi = baseApi.injectEndpoints({
     updateEvent: builder.mutation({
       query: ({ id, data }) => {
         const accessToken = sessionStorage.getItem("accessToken");
-        console.log({ accessToken, eventId: id, eventData: data });
+        console.log({ accessToken });
+        console.log("data", data);
 
         return {
           url: `/events/${id}`,

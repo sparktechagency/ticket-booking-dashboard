@@ -11,6 +11,7 @@ import {
   FaCheckCircle,
 } from "react-icons/fa";
 import { FaX } from "react-icons/fa6";
+import { MdAdd, MdSearch, MdEdit, MdDelete } from "react-icons/md";
 import {
   Select,
   MenuItem,
@@ -19,12 +20,15 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { EventManagementModal } from "../UI/EventManagementModal";
+import { DeleteConfirmationModal } from "../UI/DeleteConfirmationModal";
 import {
   useGetAllEventsQuery,
   useCreateEventMutation,
   useUpdateEventMutation,
   useDeleteEventMutation,
 } from "../../Redux/api/eventsApi";
+import { useGetAllArtistsQuery } from "../../Redux/api/artistApi";
+import { useGetAllTeamsQuery } from "../../Redux/api/teamsApi";
 import { toast } from "sonner";
 import { getImageUrl } from "../../utils/baseUrl";
 import dayjs from "dayjs";
@@ -37,20 +41,29 @@ export default function Events() {
     isError,
   } = useGetAllEventsQuery();
 
+  const { data: artistsResponse } = useGetAllArtistsQuery();
+  const { data: teamsResponse } = useGetAllTeamsQuery();
+
   const [createEvent, { isLoading: isCreating }] = useCreateEventMutation();
   const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation();
   const [deleteEvent, { isLoading: isDeleting }] = useDeleteEventMutation();
 
   const events = eventsResponse?.data?.data || [];
+  const artists = artistsResponse?.data?.data || [];
+  const teams = teamsResponse?.data?.data || [];
+  
   console.log("events", events);
 
   /* -------------------- STATE -------------------- */
+
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [startDateFilter, setStartDateFilter] = useState("");
   const [endDateFilter, setEndDateFilter] = useState("");
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState(null);
   const [eventsPage, setEventsPage] = useState(1);
 
   const imageUrl = getImageUrl();
@@ -94,30 +107,41 @@ export default function Events() {
   const handleSaveEvent = async (eventData) => {
     try {
       if (editingEvent) {
-        await updateEvent({
+       const updatedEvent = await updateEvent({
           id: editingEvent._id,
           data: eventData,
         }).unwrap();
+        console.log("updatedEvent", updatedEvent);
         toast.success("Event updated successfully!");
       } else {
-        await createEvent(eventData).unwrap();
+       const createdEvent = await createEvent(eventData).unwrap();
+       console.log("createdEvent", createdEvent);
         toast.success("Event created successfully!");
       }
 
       setEventModalOpen(false);
       setEditingEvent(null);
     } catch (error) {
+      console.log("error", error);
       toast.error(error?.data?.message || "Failed to save event");
     }
   };
 
-  const onDeleteEvent = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this event?")) return;
+  const onDeleteEvent = (id) => {
+    setDeleteTargetId(id);
+    setDeleteModalOpen(true);
+  };
 
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetId) return;
     try {
-      await deleteEvent(id).unwrap();
+      const deletedEvent = await deleteEvent(deleteTargetId).unwrap();
+      console.log("deletedEvent", deletedEvent);
       toast.success("Event deleted successfully!");
+      setDeleteModalOpen(false);
+      setDeleteTargetId(null);
     } catch (error) {
+      console.log("error", error);
       toast.error(error?.data?.message || "Failed to delete event");
     }
   };
@@ -293,10 +317,10 @@ export default function Events() {
               <div className="flex-1">
                 <h3 className="text-xl text-white">{event.title}</h3>
                 <p className="text-[#bd85f1] mb-2">
-                  {event?.category === "Concert"
-                    ? event?.artistId?.name
-                    : event.category === "Sports"
-                    ? event?.teamId?.name
+                  {event?.category?.toLowerCase() === "concert"
+                    ? event?.artist?.name || event?.artistId?.name
+                    : event?.category?.toLowerCase() === "sports"
+                    ? `${event?.teamA?.name} vs ${event?.teamB?.name}`
                     : "N/A"}
                 </p>
 
@@ -394,6 +418,8 @@ export default function Events() {
       {/* Modal */}
       <EventManagementModal
         event={editingEvent}
+        artists={artists}
+        teams={teams}
         isOpen={eventModalOpen}
         isLoading={isCreating || isUpdating}
         onClose={() => {
@@ -402,6 +428,17 @@ export default function Events() {
         }}
         onSave={handleSaveEvent}
       />
+
+      <DeleteConfirmationModal
+        open={deleteModalOpen}
+        title="Delete Event"
+        description="Are you sure you want to delete this event? This action cannot be undone."
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setDeleteTargetId(null);
+        }}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
-}
+};

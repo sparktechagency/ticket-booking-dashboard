@@ -1,12 +1,6 @@
 import { useState, useMemo } from "react";
 import { Button, TablePagination, CircularProgress } from "@mui/material";
-import {
-  FaEdit,
-  FaTrash,
-  FaPlus,
-  FaSearch,
-  FaTicketAlt,
-} from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus, FaSearch, FaTicketAlt } from "react-icons/fa";
 import { toast } from "sonner";
 
 import { ArtistManagementModal } from "../UI/ArtistManagementModal";
@@ -84,7 +78,7 @@ export default function Artists() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isCreating || isUpdating) {
     return (
       <div className="flex justify-center items-center h-[92vh]">
         <CircularProgress />
@@ -95,7 +89,9 @@ export default function Artists() {
   if (isError) {
     return (
       <div className="flex justify-center items-center h-[92vh]">
-        <p className="text-white">Something went wrong while loading artists.</p>
+        <p className="text-white">
+          Something went wrong while loading artists.
+        </p>
       </div>
     );
   }
@@ -150,13 +146,18 @@ export default function Artists() {
             key={artist.id || artist._id}
             className="bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/60 border border-white/10 rounded-3xl p-6"
           >
-            <div className="flex flex-col lg:flex-row gap-6">
+            <div className="flex flex-col lg:flex-row items-center gap-6">
               <img
-                src={artist.image ? `${imageUrl}${artist.image}` : "https://via.placeholder.com/400?text=No+Image"}
+                src={
+                  artist.image
+                    ? `${imageUrl}${artist.image}`
+                    : "https://via.placeholder.com/400?text=No+Image"
+                }
                 alt={artist.name}
                 className="w-full lg:w-32 h-48 lg:h-32 rounded-2xl object-cover"
                 onError={(e) => {
-                  e.target.src = "https://via.placeholder.com/400?text=No+Image";
+                  e.target.src =
+                    "https://via.placeholder.com/400?text=No+Image";
                 }}
               />
 
@@ -166,9 +167,11 @@ export default function Artists() {
                 </h3>
                 <p className="text-[#bd85f1] mb-2">{artist.genre}</p>
 
-                <p className="text-sm text-[#99a1af] mb-4 line-clamp-2">
-                  {artist.bio}
-                </p>
+                {artist?.bio && (
+                  <p className="text-sm text-[#99a1af] mb-4 line-clamp-2">
+                    {artist.bio}
+                  </p>
+                )}
 
                 <div className="flex gap-4 text-sm text-[#99a1af]">
                   <span className="flex items-center gap-2">
@@ -202,9 +205,9 @@ export default function Artists() {
             </div>
           </div>
         ))}
-         {paginatedArtists.length === 0 && (
+        {paginatedArtists.length === 0 && (
           <div className="text-center text-[#99a1af] py-10">
-             {searchQuery 
+            {searchQuery
               ? `No artists found matching "${searchQuery}"`
               : "No artists found. Add your first artist!"}
           </div>
