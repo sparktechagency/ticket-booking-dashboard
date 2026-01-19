@@ -37,19 +37,21 @@ const PrivacyPolicy = () => {
   } = useGetPrivacyPolicyQuery();
 
   const privacyData = getPrivacyData?.data;
+  // console.log(privacyData);
 
   const [addPrivacyPolicy, { isLoading: isAdding }] =
     useAddPrivacyPolicyMutation();
 
   // Populate editor when data is fetched
   useEffect(() => {
-    if (privacyData?.length) {
-      const latest = privacyData.reduce((latest, current) =>
-        new Date(current.createdAt) > new Date(latest.createdAt)
-          ? current
-          : latest
-      );
-      setContent(latest.content);
+    if (privacyData?.content.length) {
+      // const latest = privacyData.reduce((latest, current) =>
+      //   new Date(current.createdAt) > new Date(latest.createdAt)
+      //     ? current
+      //     : latest,
+      // );
+      console.log(privacyData?.content);
+      setContent(privacyData?.content);
     }
   }, [privacyData]);
 

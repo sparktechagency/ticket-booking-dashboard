@@ -49,11 +49,11 @@ const contentApi = baseApi.injectEndpoints({
     addPrivacyPolicy: builder.mutation({
       query: (payload) => {
         const accessToken = sessionStorage.getItem("accessToken");
-        console.log(accessToken);
-        console.log("PrivacyPolicy", payload);
+        // console.log(accessToken);
+        // console.log("PrivacyPolicy", payload);
         return {
           url: "/privacy",
-          method: "post",
+          method: "patch",
           body: payload,
           headers: {
             authorization: `Bearer ${accessToken}`,
@@ -83,7 +83,7 @@ const contentApi = baseApi.injectEndpoints({
         console.log("TermsAndConditions", payload);
         return {
           url: "/terms",
-          method: "post",
+          method: "patch",
           body: payload,
           headers: {
             authorization: `Bearer ${accessToken}`,
@@ -113,7 +113,7 @@ const contentApi = baseApi.injectEndpoints({
         console.log("TermsAndConditions", payload);
         return {
           url: "/refund-policies",
-          method: "post",
+          method: "patch",
           body: payload,
           headers: {
             authorization: `Bearer ${accessToken}`,

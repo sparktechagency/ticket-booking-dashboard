@@ -45,7 +45,7 @@ const TermsAndConditions = () => {
       const latest = termsData.reduce((latest, current) =>
         new Date(current.createdAt) > new Date(latest.createdAt)
           ? current
-          : latest
+          : latest,
       );
       setContent(latest.content);
     }
