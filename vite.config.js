@@ -6,9 +6,11 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    // host: "0.0.0.0",
-    // host: "72.62.190.141",
-    host: "http://api.adrienticket.com",
+    host: true, // ✅ correct
     port: 5173,
+  },
+  preview: {
+    host: true, // ✅ safe for preview as well
+    port: 4173,
   },
 });
