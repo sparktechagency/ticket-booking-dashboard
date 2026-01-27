@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     // host: "0.0.0.0",
-    // host: "72.62.190.141",    
-    port: 1001,
+    // host: "72.62.190.141",
+    host: "http://api.adrienticket.com",
+    port: 5173,
   },
 });
