@@ -15,13 +15,15 @@ import { HiArrowLeft } from "react-icons/hi";
 import { Link, useNavigate } from "react-router-dom";
 import { IoMdEye } from "react-icons/io";
 import { IoIosEyeOff } from "react-icons/io";
+import { useUpdatePasswordMutation } from "../Redux/api/authApi";
+import { toast } from "sonner";
 
 const UpdatePassword = () => {
   const navigate = useNavigate();
+  const [resetPassword] = useUpdatePasswordMutation();
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
 
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -30,17 +32,50 @@ const UpdatePassword = () => {
   const handleShowConfirmPassword = () =>
     setShowConfirmPassword((prev) => !prev);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Validation for password match
-    if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
+    const form = new FormData(event.target);
+    const values = {
+      password: form.get("password"),
+      confirmPassword: form.get("confirmPassword"),
+    };
+
+    console.log("Update Password Values", values);
+
+    try {
+      const data = {
+        newPassword: values.password,
+        confirmPassword: values.confirmPassword,
+      };
+
+      if (values.password !== values.confirmPassword) {
+        toast.error("Passwords do not match.");
+        return;
+      }
+
+      const response = await resetPassword(data).unwrap();
+      if (response.success) {
+        toast.success("Password updated successfully!");
+        navigate("/sign-in");
+      }
+    } catch (error) {
+      console.log("update password error", error);
+      if (error.response) {
+        toast.error(
+          error.response.data.message ||
+            "Failed to update password. Please try again.",
+        );
+      }
+      if (
+        error.data?.message ===
+        "You don't have authorization to reset your password, please verify your account first."
+      ) {
+        toast.error("Please Verify Your Account First");
+      } else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
     }
-    setError("");
-    console.log("Password change request submitted");
-    navigate("/sign-in", { replace: true });
   };
 
   return (
@@ -53,7 +88,7 @@ const UpdatePassword = () => {
           alignItems="center"
           style={{ minHeight: "80vh" }}
         >
-          <div className="bg-[#140f36] rounded-lg p-5 border border-[#875473] w-1/2">
+          <div className="bg-[#140f36] rounded-lg p-5 border border-[#6639a1] w-1/2">
             <div className="mb-8 text-white">
               <div className="flex items-center gap-1 mb-4">
                 <Link to="/verify-otp" style={{ textDecoration: "none" }}>
@@ -98,15 +133,15 @@ const UpdatePassword = () => {
                     borderRadius: "12px",
 
                     "& fieldset": {
-                      borderColor: "rgba(255,255,255,0.25)",
+                      borderColor: "#6639a1",
                     },
 
                     "&:hover fieldset": {
-                      borderColor: "rgba(224,215,255,0.6)",
+                      borderColor: "#6639a1",
                     },
 
                     "&.Mui-focused fieldset": {
-                      borderColor: "#cfc3ff",
+                      borderColor: "#6639a1",
                       borderWidth: "1.5px",
                     },
 
@@ -163,15 +198,15 @@ const UpdatePassword = () => {
                     borderRadius: "12px",
 
                     "& fieldset": {
-                      borderColor: "rgba(255,255,255,0.25)",
+                      borderColor: "#fff",
                     },
 
                     "&:hover fieldset": {
-                      borderColor: "rgba(224,215,255,0.6)",
+                      borderColor: "#fff",
                     },
 
                     "&.Mui-focused fieldset": {
-                      borderColor: "#cfc3ff",
+                      borderColor: "#fff",
                       borderWidth: "1.5px",
                     },
 
@@ -198,13 +233,6 @@ const UpdatePassword = () => {
                   }
                 />
               </div>
-
-              {/* Error Message */}
-              {error && (
-                <div>
-                  <Typography color="error">{error}</Typography>
-                </div>
-              )}
 
               {/* Submit Button */}
               <div className="w-full">

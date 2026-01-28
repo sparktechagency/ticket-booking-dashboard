@@ -123,6 +123,23 @@ const SignIn = () => {
                     color: "#cc9fe6",
                     opacity: 0.99,
                   },
+
+                  "& input:-webkit-autofill": {
+                    WebkitBoxShadow: "0 0 0 1000px #140f36 inset",
+                    WebkitTextFillColor: "#fff",
+                    caretColor: "#fff",
+                    borderRadius: "4px",
+                  },
+
+                  "& input:-webkit-autofill:hover": {
+                    WebkitBoxShadow: "0 0 0 1000px #140f36 inset",
+                    WebkitTextFillColor: "#fff",
+                  },
+
+                  "& input:-webkit-autofill:focus": {
+                    WebkitBoxShadow: "0 0 0 1000px #140f36 inset",
+                    WebkitTextFillColor: "#fff",
+                  },
                 }}
               />
               <TextField
@@ -192,6 +209,23 @@ const SignIn = () => {
                   "& input::placeholder": {
                     color: "#cc9fe6",
                     opacity: 0.99,
+                  },
+
+                  "& input:-webkit-autofill": {
+                    WebkitBoxShadow: "0 0 0 1000px #140f36 inset",
+                    WebkitTextFillColor: "#fff",
+                    caretColor: "#fff",
+                    borderRadius: "4px",
+                  },
+
+                  "& input:-webkit-autofill:hover": {
+                    WebkitBoxShadow: "0 0 0 1000px #140f36 inset",
+                    WebkitTextFillColor: "#fff",
+                  },
+
+                  "& input:-webkit-autofill:focus": {
+                    WebkitBoxShadow: "0 0 0 1000px #140f36 inset",
+                    WebkitTextFillColor: "#fff",
                   },
                 }}
               />
