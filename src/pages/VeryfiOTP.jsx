@@ -4,13 +4,12 @@ import OTPInput from "react-otp-input";
 import { HiArrowLeft } from "react-icons/hi";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-// import { useVerifyOtpMutation } from "../../Redux/api/authApi";
-// import { toast } from "sonner";
+import { useVerifyOtpMutation } from "../Redux/api/authApi";
 
 const VerifyOtp = () => {
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
-  //   const [verifyOtp] = useVerifyOtpMutation();
+  const [verifyOtp] = useVerifyOtpMutation();
 
   const handleOTPSubmit = async () => {
     navigate("/update-password");
@@ -19,31 +18,31 @@ const VerifyOtp = () => {
       toast.info("Please fill in all OTP fields");
       return;
     }
-    // const token = localStorage.getItem("otpToken");
-    // if (!token) {
-    //   alert("Error! Please start the reset process again.");
-    //   navigate("/forgot-password");
-    //   return;
-    // }
-    // try {
-    //   const data = { token, otp };
-    //   const response = await verifyOtp(data).unwrap();
-    //   if (response.success === true) {
-    //     localStorage.setItem(
-    //       "verifiedOtpToken",
-    //       response?.data?.forgetOtpMatchToken
-    //     );
-    //     toast.success("OTP verified successfully!");
-    //     navigate("/reset-password");
-    //   }
-    // } catch (error) {
-    //   console.error("Error verifying OTP:", error);
-    //   if (error.data?.message === "Invalid OTP") {
-    //     toast.error("Invalid OTP. Please try again.");
-    //   } else {
-    //     toast.error("Failed to verify OTP. Please try again.");
-    //   }
-    // }
+    const token = localStorage.getItem("otpToken");
+    if (!token) {
+      alert("Error! Please start the reset process again.");
+      navigate("/forgot-password");
+      return;
+    }
+    try {
+      const data = { token, otp };
+      const response = await verifyOtp(data).unwrap();
+      if (response.success === true) {
+        localStorage.setItem(
+          "verifiedOtpToken",
+          response?.data?.forgetOtpMatchToken,
+        );
+        toast.success("OTP verified successfully!");
+        navigate("/reset-password");
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      if (error.data?.message === "Invalid OTP") {
+        toast.error("Invalid OTP. Please try again.");
+      } else {
+        toast.error("Failed to verify OTP. Please try again.");
+      }
+    }
   };
 
   return (
@@ -56,7 +55,7 @@ const VerifyOtp = () => {
           alignItems="center"
           style={{ minHeight: "80vh" }}
         >
-          <div className="bg-[#140f36] rounded-lg p-5 border border-[#875473]">
+          <div className="bg-[#140f36] rounded-lg p-5 border border-[#502b94]">
             <div className="mb-8 text-white">
               <div className="flex items-center gap-1 mb-4">
                 <Link to="/forgot-password" className="cursor-pointer">
@@ -78,7 +77,7 @@ const VerifyOtp = () => {
                   height: "45px",
                   fontSize: "20px",
                   backgroundColor: "transparent",
-                  border: "1px solid #875473",
+                  border: "1px solid #fff",
                   borderRadius: "8px",
                   margin: "5px",
                   textAlign: "center",

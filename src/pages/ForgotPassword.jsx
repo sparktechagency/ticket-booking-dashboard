@@ -4,13 +4,13 @@ import { HiArrowLeft } from "react-icons/hi";
 import { IoMailOpen } from "react-icons/io5";
 
 import { Link, useNavigate } from "react-router-dom";
-// import { useForgetPasswordMutation } from "../../Redux/api/authApi";
-// import { toast } from "sonner";
+import { useForgotPasswordMutation } from "../Redux/api/authApi";
+import { toast } from "sonner";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
-  // const [forgetPassword] = useForgetPasswordMutation();
+  const [forgetPassword] = useForgotPasswordMutation();
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -20,21 +20,21 @@ const ForgotPassword = () => {
     const data = { email };
     console.log("Success:", data);
     navigate("/verify-otp");
-    // try {
-    //   const response = await forgetPassword(data).unwrap();
-    //   console.log("response token", response);
-    //   if (response.success === true) {
-    //     localStorage.setItem("otpToken", response?.data?.forgetToken);
-    //     localStorage.setItem("userEmail", email);
-    //     toast.success("An OTP has been sent to your email!");
-    //     navigate("/verify-otp");
-    //   }
-    // } catch (error) {
-    //   console.error("Error sending reset code:", error);
-    //   if (error.data?.message === "User not found") {
-    //     toast.error("Incorrect Email.");
-    //   }
-    // }
+    try {
+      const response = await forgetPassword(data).unwrap();
+      console.log("response token", response);
+      if (response.success === true) {
+        localStorage.setItem("otpToken", response?.data?.forgetToken);
+        localStorage.setItem("userEmail", email);
+        toast.success("An OTP has been sent to your email!");
+        navigate("/verify-otp");
+      }
+    } catch (error) {
+      console.error("Error sending reset code:", error);
+      if (error.data?.message === "User not found") {
+        toast.error("Incorrect Email.");
+      }
+    }
   };
 
   return (
@@ -86,20 +86,20 @@ const ForgotPassword = () => {
                     },
 
                     "&:hover fieldset": {
-                      borderColor: "#a06a8d",
+                      borderColor: "#fff",
                     },
 
                     "&.Mui-focused fieldset": {
-                      borderColor: "#875473",
+                      borderColor: "#fff",
                     },
                   },
 
                   "& .MuiInputLabel-root": {
-                    color: "#875473",
+                    color: "#fff",
                   },
 
                   "& .MuiInputLabel-root.Mui-focused": {
-                    color: "#875473",
+                    color: "#fff",
                   },
 
                   "& input::placeholder": {
