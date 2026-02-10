@@ -11,6 +11,7 @@ import {
   Select,
   Switch,
   TextField,
+  Box,
 } from "@mui/material";
 import React from "react";
 import { MdAdd, MdDelete, MdPalette } from "react-icons/md";
@@ -22,8 +23,6 @@ export default function TicketsAndPricing({
   removeTicketCategory,
   updateTicketCategory,
   darkFieldSx,
-  DEFAULT_COLORS,
-  COLOR_NAMES,
   darkLabelSx,
 }) {
   return (
@@ -153,57 +152,26 @@ export default function TicketsAndPricing({
                   InputLabelProps={{ sx: darkLabelSx }}
                 />
 
-                <FormControl fullWidth>
-                  <InputLabel
-                    sx={{
-                      color: "#9ca3af",
-                      "&.Mui-focused": {
-                        color: "#c4b5fd",
-                      },
-                    }}
-                  >
-                    Color
-                  </InputLabel>
-                  <Select
-                    value={cat.color}
-                    onChange={(e) =>
-                      updateTicketCategory(cat.id, {
-                        color: e.target.value,
-                      })
-                    }
-                    sx={darkFieldSx}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          bgcolor: "#030a1d",
-                          color: "white",
-                        },
-                      },
-                    }}
-                  >
-                    {DEFAULT_COLORS.map((color) => (
-                      <MenuItem key={color} value={color}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "10px",
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: "24px",
-                              height: "24px",
-                              backgroundColor: color,
-                              borderRadius: "6px",
-                            }}
-                          />
-                          {COLOR_NAMES[color]}
-                        </div>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <div className="flex gap-4 items-center">
+                   <div className="relative w-full">
+                      <label className="text-xs text-[#9ca3af] absolute -top-2.5 left-3 bg-[#080014] px-1">
+                        Category Color
+                      </label>
+                      <div className="flex items-center gap-3 p-3 bg-[#030a1d] rounded-xl border border-white/15 h-[56px]">
+                         <input 
+                           type="color"
+                           value={cat.color}
+                           onChange={(e) =>
+                             updateTicketCategory(cat.id, {
+                               color: e.target.value,
+                             })
+                           }
+                           className="w-8 h-8 rounded cursor-pointer bg-transparent border-0 p-0"
+                         />
+                         <span className="text-white font-mono">{cat.color}</span>
+                      </div>
+                   </div>
+                </div>
 
                 <div style={{ display: "flex", gap: "16px" }}>
                   <TextField
