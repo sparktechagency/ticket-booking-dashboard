@@ -81,17 +81,7 @@ export default function EventDetailsForm({
           >
             Event Thumbnail *
           </label>
-          <div
-            style={{
-              height: "260px",
-              border: "2px dashed #444",
-              borderRadius: "12px",
-              overflow: "hidden",
-              position: "relative",
-              backgroundColor: "#030a1d",
-              cursor: "pointer",
-            }}
-          >
+          <div className="h-[260px] border-2 border-dashed border-[#444] rounded-xl overflow-hidden relative bg-[#030a1d]">
             {imagePreview ? (
               <img
                 src={imagePreview}
@@ -103,16 +93,7 @@ export default function EventDetailsForm({
                 }}
               />
             ) : (
-              <label
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "100%",
-                  color: "#99a1af",
-                }}
-              >
+              <label className="flex flex-col items-center justify-center h-full text-[#99a1af] cursor-pointer">
                 <MdImage size={48} />
                 <span style={{ marginTop: "12px" }}>Upload Thumbnail</span>
                 <input
@@ -163,27 +144,10 @@ export default function EventDetailsForm({
         </div>
 
         <div style={{ flex: "1 1 300px" }}>
-          <label
-            style={{
-              display: "block",
-              color: "#99a1af",
-              fontSize: "0.875rem",
-              marginBottom: "8px",
-            }}
-          >
+          <label className="block text-[#99a1af] text-sm mb-2">
             Stadium / Seating Chart
           </label>
-          <div
-            style={{
-              height: "260px",
-              border: "2px dashed #444",
-              borderRadius: "12px",
-              overflow: "hidden",
-              position: "relative",
-              backgroundColor: "#030a1d",
-              cursor: "pointer",
-            }}
-          >
+          <div className="h-[260px] border-2 border-dashed border-[#444] rounded-xl overflow-hidden relative bg-[#030a1d]">
             {seatingPreview ? (
               <img
                 src={seatingPreview}
@@ -195,16 +159,7 @@ export default function EventDetailsForm({
                 }}
               />
             ) : (
-              <label
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: "100%",
-                  color: "#99a1af",
-                }}
-              >
+              <label className="flex flex-col items-center justify-center h-full text-[#99a1af] cursor-pointer">
                 <MdMap size={48} />
                 <span style={{ marginTop: "12px" }}>Upload Seating Chart</span>
                 <input
@@ -364,7 +319,10 @@ export default function EventDetailsForm({
             >
               <MenuItem value="">Select an artist...</MenuItem>
               {artists?.map((artist) => (
-                <MenuItem key={artist.id || artist._id} value={artist.id || artist._id}>
+                <MenuItem
+                  key={artist.id || artist._id}
+                  value={artist.id || artist._id}
+                >
                   {artist.name} - {artist.genre}
                 </MenuItem>
               ))}
@@ -384,7 +342,10 @@ export default function EventDetailsForm({
               >
                 <MenuItem value="">Select Team A</MenuItem>
                 {teams?.map((team) => (
-                  <MenuItem key={team.id || team._id} value={team.id || team._id}>
+                  <MenuItem
+                    key={team.id || team._id}
+                    value={team.id || team._id}
+                  >
                     {team.name}
                   </MenuItem>
                 ))}
@@ -400,7 +361,10 @@ export default function EventDetailsForm({
               >
                 <MenuItem value="">Select Team B</MenuItem>
                 {teams?.map((team) => (
-                  <MenuItem key={team.id || team._id} value={team.id || team._id}>
+                  <MenuItem
+                    key={team.id || team._id}
+                    value={team.id || team._id}
+                  >
                     {team.name}
                   </MenuItem>
                 ))}

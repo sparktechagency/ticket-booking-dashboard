@@ -1,18 +1,14 @@
 import { useState, useEffect } from "react";
 import {
-  Modal,
-  Fade,
-  Backdrop,
   Tabs,
   Tab,
   Button,
-  IconButton,
-  Paper,
 } from "@mui/material";
-import { MdClose, MdSave } from "react-icons/md";
+import { FaTimes, FaSave } from "react-icons/fa";
 import { toast } from "sonner";
 import TicketsAndPricing from "./TicketsAndPricing";
 import EventDetailsForm from "./EventDetailsForm";
+import { getImageUrl } from "../../utils/baseUrl";
 
 const DEFAULT_COLORS = [
   "#FFD700",
@@ -68,11 +64,6 @@ const darkLabelSx = {
   },
 };
 
-// ... imports
-import { getImageUrl } from "../../utils/baseUrl";
-
-// ... constants
-
 export function EventManagementModal({
   event,
   artists,
@@ -84,8 +75,8 @@ export function EventManagementModal({
   const imageUrlBase = getImageUrl();
   const [formData, setFormData] = useState({
     title: event?.title || "",
-    artistId: event?.artistId || "", // Assuming this is an ID
-    artist: event?.artist || "", // For display if needed, but selecting via ID usually
+    artistId: event?.artistId || "", 
+    artist: event?.artist || "", 
     date: event?.date || "",
     time: event?.time || "20:00",
     venue: event?.venue || "",
@@ -117,7 +108,6 @@ export function EventManagementModal({
 
   useEffect(() => {
     if (event) {
-       // Construct previews
        const imgPath = event.imageUrl || event.thumbnail;
        setImagePreview(imgPath ? (imgPath.startsWith("http") ? imgPath : `${imageUrlBase}${imgPath}`) : "");
 
@@ -125,10 +115,8 @@ export function EventManagementModal({
        setSeatingPreview(seatPath ? (seatPath.startsWith("http") ? seatPath : `${imageUrlBase}${seatPath}`) : "");
        
        setFormData({
-         // ... populate form data
          title: event.title || "",
          artistId: event.artist?._id || event.artistId?._id || event.artist || event.artistId || "", 
-         // Ensure artistId is the ID string if populating from populated object
          date: event.eventDate ? event.eventDate.split('T')[0] : (event.date ? event.date.split('T')[0] : ""),
          time: event.eventDate ? event.eventDate.split('T')[1].substring(0, 5) : (event.time || "20:00"),
          venue: event.venueName || event.venue || "", 
@@ -145,13 +133,12 @@ export function EventManagementModal({
              color: cat.sectionColor || cat.color,
              basePrice: cat.pricePerTicket || cat.basePrice,
              totalQuantity: cat.totalQuantity,
-             availableQuantity: cat.availableQuantity, // Assuming this stays same or backend handles it
+             availableQuantity: cat.availableQuantity,
              notes: cat.notes || "",
          })) || [],
          ticketsAvailable: event.ticketCategories?.length > 0
        });
     } else {
-       // Reset
        setImagePreview("");
        setSeatingPreview("");
        setFormData({
@@ -261,7 +248,6 @@ export function EventManagementModal({
   };
 
   const handleSave = () => {
-    // Basic validation
     if (
       !formData.title ||
       !formData.date ||
@@ -277,7 +263,6 @@ export function EventManagementModal({
       return;
     }
 
-    // Category-specific validation
     if (formData.category === "concert" && !formData.artistId) {
       toast.warning("Please select an artist.");
       return;
@@ -293,24 +278,18 @@ export function EventManagementModal({
 
     const dataToSend = new FormData();
 
-    // Construct eventDate combining date and time
-    // Default time to 00:00:00 if not provided, though we have a time picker
     const dateTimeString = `${formData.date}T${formData.time || "00:00"}:00.000Z`;
 
-    // Map ticket categories to backend structure
     const mappedTickets = formData.ticketCategories.map(t => ({
       ticketName: t.name,
       sectionColor: t.color.startsWith("#") ? (COLOR_NAMES[t.color] || "Red") : t.color, 
       pricePerTicket: Number(t.basePrice),
       totalQuantity: Number(t.totalQuantity)
-      // Assuming 'notes' or other fields aren't needed based on the user request, 
-      // or if they are, the backend ignores them. User provided generic structure.
     }));
 
-    // Base payload
     const payload = {
       title: formData.title,
-      category: formData.category.charAt(0).toUpperCase() + formData.category.slice(1), // Capitalize "Sports" / "Concert"
+      category: formData.category.charAt(0).toUpperCase() + formData.category.slice(1), 
       eventDate: dateTimeString,
       city: formData.city,
       venueName: formData.venue,
@@ -318,9 +297,7 @@ export function EventManagementModal({
       ticketCategories: formData.ticketsAvailable ? mappedTickets : [],
     };
 
-    // Add category-specific fields
     if (formData.category === "sports") {
-      // teams contains IDs based on previous fixes
       payload.teamA = formData.teams[0];
       payload.teamB = formData.teams[1];
     } else if (formData.category === "concert") {
@@ -334,7 +311,6 @@ export function EventManagementModal({
     }
 
     if (formData.seatingChartFile) {
-      // User specified 'seatingView' as the file key
       dataToSend.append("seatingView", formData.seatingChartFile);
     }
 
@@ -342,69 +318,39 @@ export function EventManagementModal({
     onClose();
   };
 
-  return (
-    <Modal
-      open={isOpen}
-      onClose={(event, reason) => {
-        if (reason !== "backdropClick") {
-          onClose();
-        }
-      }}
-      closeAfterTransition
-      BackdropComponent={Backdrop}
-      BackdropProps={{ timeout: 500 }}
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Fade in={isOpen}>
-        <Paper
-          sx={{
-            width: "90%",
-            maxWidth: "900px",
-            maxHeight: "90vh",
-            bgcolor: "#080014",
-            color: "white",
-            borderRadius: "16px",
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          {/* Header */}
-          <div
-            style={{
-              bgcolor: "",
-              padding: "15px",
-              position: "relative",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <h2 style={{ margin: 0, fontSize: "1.8rem", fontWeight: "bold" }}>
-                {event ? "Edit Event" : "Create New Event"}
-              </h2>
-              <IconButton onClick={onClose} sx={{ color: "white" }}>
-                <MdClose size={28} />
-              </IconButton>
-            </div>
-          </div>
+  if (!isOpen) return null;
 
-          {/* Tabs */}
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="w-full max-w-4xl max-h-[90vh] bg-gradient-to-br from-[#6d1db9]/10 via-[#080014] to-[#030a1d]/90 border border-white/10 rounded-3xl overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-white/10">
+          <div>
+            <h2 className="text-2xl text-white font-display">
+              {event ? "Edit Event" : "Create New Event"}
+            </h2>
+            <p className="text-sm text-[#99a1af] mt-1">
+              {event
+                ? "Update event details, pricing and availability"
+                : "Schedule a new event and set up tickets"}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-[#99a1af] hover:text-white cursor-pointer"
+          >
+            <FaTimes size={20} />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="px-6 pt-4">
           <Tabs
             value={activeTab}
             onChange={(_, v) => setActiveTab(v)}
             sx={{
               borderBottom: "1px solid rgba(255,255,255,0.1)",
               height: "40px",
-              backgroundColor: "#160e22",
               "& .MuiTabs-indicator": {
                 backgroundColor: "#bd85f1",
                 height: "3px",
@@ -415,22 +361,10 @@ export function EventManagementModal({
               label="Event Details"
               sx={{
                 color: activeTab === 0 ? "#fff" : "#99a1af",
-                backgroundColor:
-                  activeTab === 0
-                    ? "linear-gradient(to right, #6d1db9, #bd85f1)"
-                    : "transparent",
-                // bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] text-white shadow-lg shadow-[#6d1db9]/30
-                borderRadius: "12px",
-                margin: "8px 4px",
                 textTransform: "none",
+                fontSize: "1rem",
                 "&.Mui-selected": {
                   color: "#fff",
-                  backgroundColor:
-                    "linear-gradient(to right, #6d1db9, #bd85f1)",
-                },
-                "&:hover": {
-                  color: "#fff",
-                  backgroundColor: "rgba(255,255,255,0.05)",
                 },
               }}
             />
@@ -438,94 +372,91 @@ export function EventManagementModal({
               label="Tickets & Pricing"
               sx={{
                 color: activeTab === 1 ? "#fff" : "#99a1af",
-                backgroundColor:
-                  activeTab === 1
-                    ? "linear-gradient(to right, #6d1db9, #bd85f1)"
-                    : "transparent",
-                borderRadius: "12px",
-                margin: "8px 4px",
                 textTransform: "none",
+                fontSize: "1rem",
                 "&.Mui-selected": {
                   color: "#fff",
-                },
-                "&:hover": {
-                  color: "#fff",
-                  backgroundColor: "rgba(255,255,255,0.05)",
                 },
               }}
             />
           </Tabs>
-          {/* Content */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
-            {activeTab === 0 && (
-              <EventDetailsForm
-                imagePreview={imagePreview}
-                handleImageUpload={handleImageUpload}
-                seatingPreview={seatingPreview}
-                handleSeatingUpload={handleSeatingUpload}
-                formData={formData}
-                setFormData={setFormData}
-                handleArtistChange={handleArtistChange}
-                handleTeamChange={handleTeamChange}
-                artists={artists}
-                teams={teams}
-              />
-            )}
+        </div>
 
-            {activeTab === 1 && (
-              <TicketsAndPricing
-                formData={formData}
-                setFormData={setFormData}
-                addTicketCategory={addTicketCategory}
-                removeTicketCategory={removeTicketCategory}
-                updateTicketCategory={updateTicketCategory}
-                darkFieldSx={darkFieldSx}
-                darkLabelSx={darkLabelSx}
-                DEFAULT_COLORS={DEFAULT_COLORS}
-                COLOR_NAMES={COLOR_NAMES}
-              />
-            )}
-          </div>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {activeTab === 0 && (
+            <EventDetailsForm
+              imagePreview={imagePreview}
+              handleImageUpload={handleImageUpload}
+              seatingPreview={seatingPreview}
+              handleSeatingUpload={handleSeatingUpload}
+              formData={formData}
+              setFormData={setFormData}
+              handleArtistChange={handleArtistChange}
+              handleTeamChange={handleTeamChange}
+              artists={artists}
+              teams={teams}
+            />
+          )}
 
-          {/* Footer */}
-          <div
-            style={{
-              bgcolor: "#1a0033",
-              padding: "20px 24px",
-              display: "flex",
-              justifyContent: "flex-end",
-              gap: "16px",
+          {activeTab === 1 && (
+            <TicketsAndPricing
+              formData={formData}
+              setFormData={setFormData}
+              addTicketCategory={addTicketCategory}
+              removeTicketCategory={removeTicketCategory}
+              updateTicketCategory={updateTicketCategory}
+              darkFieldSx={darkFieldSx}
+              darkLabelSx={darkLabelSx}
+              DEFAULT_COLORS={DEFAULT_COLORS}
+              COLOR_NAMES={COLOR_NAMES}
+            />
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-6 border-t border-white/10 flex justify-between">
+          <Button
+            sx={{
+              textTransform: "none",
+              px: 3,
+              py: 1,
+              backgroundColor: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "white",
+              borderRadius: "12px",
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(255,255,255,0.1)",
+              },
             }}
+            onClick={onClose}
           >
-            <Button
-              onClick={onClose}
-              sx={{
-                bgcolor: "#111cc",
-                border: "1px solid #6d1db9aa",
-                "&:hover": { bgcolor: "#5b189baa" },
-                minWidth: "150px",
-                textTransform: "none",
-                color: "white",
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<MdSave />}
-              onClick={handleSave}
-              sx={{
-                bgcolor: "#6d1db9",
-                "&:hover": { bgcolor: "#5b189b" },
-                minWidth: "160px",
-                textTransform: "none",
-              }}
-            >
-              {event ? "Update Event" : "Create Event"}
-            </Button>
-          </div>
-        </Paper>
-      </Fade>
-    </Modal>
+            Cancel
+          </Button>
+          <Button
+            sx={{
+              textTransform: "none",
+              px: 3,
+              py: 1,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              background: "linear-gradient(to right, #6d1db9, #bd85f1)",
+              color: "white",
+              borderRadius: "12px",
+              cursor: "pointer",
+              "&:hover": {
+                background: "linear-gradient(to right, #5b189b, #a66fd9)",
+              },
+            }}
+            onClick={handleSave}
+          >
+            <FaSave />
+            {event ? "Update Event" : "Create Event"}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

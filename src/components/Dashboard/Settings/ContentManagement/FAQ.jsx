@@ -1,43 +1,53 @@
 import {
   TextField,
   Button,
-  IconButton,
   Modal,
   CircularProgress,
+  IconButton,
 } from "@mui/material";
 import { FiHelpCircle } from "react-icons/fi";
-import { FaPlus, FaTrash, FaSave } from "react-icons/fa";
+import { FaPlus, FaSave } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
   useCreateFAQMutation,
   useGetFaqDataQuery,
+  useUpdateFAQMutation,
 } from "../../../../Redux/api/contentApi";
 
-export default function FAQ({ textFieldStyles }) {
+export default function FAQ({ textFieldStyles, category }) {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [newFaq, setNewFaq] = useState({ question: "", answer: "" });
-  // const [faqToDelete, setFaqToDelete] = useState(null);
+  const [editingId, setEditingId] = useState(null);
 
   const {
     data: allFaqData,
     isLoading,
     isError,
     refetch,
-  } = useGetFaqDataQuery();
-  const faqData = allFaqData?.data;
+  } = useGetFaqDataQuery(category); // Pass category as searchTerm
+
+  const faqData = allFaqData?.data || [];
   console.log(faqData);
 
   const [createFaq] = useCreateFAQMutation();
+  const [updateFaq] = useUpdateFAQMutation();
 
-  // Add FAQ modal handlers
+  // Add/Edit FAQ modal handlers
   const handleOpenAddModal = () => {
     setNewFaq({ question: "", answer: "" });
+    setEditingId(null);
     setAddModalOpen(true);
   };
 
-  const handleSaveNewFaq = async () => {
+  const handleEditClick = (faq) => {
+    setNewFaq({ question: faq.question, answer: faq.answer });
+    setEditingId(faq._id || faq.id); // Handle both _id and id if consistent
+    setAddModalOpen(true);
+  };
+
+  const handleSaveFaq = async () => {
     // Validate input
     if (!newFaq.question.trim() || !newFaq.answer.trim()) {
       toast.error("Please fill in both question and answer");
@@ -45,48 +55,57 @@ export default function FAQ({ textFieldStyles }) {
     }
 
     try {
-      // Call the create FAQ API
-      const response = await createFaq({
-        question: newFaq.question,
-        answer: newFaq.answer,
-      }).unwrap();
+      if (editingId) {
+        // Update existing FAQ
+        const response = await updateFaq({
+          id: editingId,
+          data: {
+            question: newFaq.question,
+            answer: newFaq.answer,
+            category: category,
+          },
+        }).unwrap();
 
-      console.log(response);
+        if (response.success) {
+          toast.success("FAQ Updated Successfully!");
+          refetch();
+          setAddModalOpen(false);
+          setNewFaq({ question: "", answer: "" });
+          setEditingId(null);
+        }
+      } else {
+        // Create new FAQ
+        const response = await createFaq({
+          question: newFaq.question,
+          answer: newFaq.answer,
+          category: category,
+        }).unwrap();
 
-      if (response.success) {
-        toast.success("FAQ Added Successfully!");
-        refetch();
-        setAddModalOpen(false);
-        setNewFaq({ question: "", answer: "" });
+        if (response.success) {
+          toast.success("FAQ Added Successfully!");
+          refetch();
+          setAddModalOpen(false);
+          setNewFaq({ question: "", answer: "" });
+        }
       }
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to add FAQ");
-      console.error("Error creating FAQ:", error);
+      toast.error(
+        error?.data?.message || `Failed to ${editingId ? "update" : "add"} FAQ`,
+      );
+      console.error(`Error ${editingId ? "updating" : "creating"} FAQ:`, error);
     }
   };
 
-  // Delete FAQ modal handlers
-  // const handleDeleteClick = (faq) => {
-  //   setFaqToDelete(faq);
-  //   setDeleteOpen(true);
-  // };
-
-  // const handleConfirmDelete = () => {
-  //   toast.success("FAQ deleted succesfully!");
-  //   setDeleteOpen(false);
-  //   setFaqToDelete(null);
-  // };
-
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-[92vh]">
+      <div className="flex justify-center items-center h-[50vh]">
         <CircularProgress />
       </div>
     );
   }
 
   if (isError) {
-    return <p>Something went wrong</p>;
+    return <p className="text-red-400 text-center">Failed to load FAQs</p>;
   }
 
   return (
@@ -97,7 +116,9 @@ export default function FAQ({ textFieldStyles }) {
             <div className="w-10 h-10 bg-gradient-to-br from-[#bd85f1]/20 to-[#6d1db9]/10 rounded-xl flex items-center justify-center">
               <FiHelpCircle className="w-5 h-5 text-[#bd85f1]" />
             </div>
-            <h3 className="text-xl text-white">FAQ Management</h3>
+            <h3 className="text-xl text-white capitalize">
+              {category} FAQ Management
+            </h3>
           </div>
 
           <Button
@@ -122,70 +143,39 @@ export default function FAQ({ textFieldStyles }) {
         {/* FAQ List */}
         {faqData.length === 0 ? (
           <p className="text-[#99a1af] text-center py-12">
-            No FAQs yet. Click “Add FAQ” to create one.
+            No FAQs found for {category}. Click “Add FAQ” to create one.
           </p>
         ) : (
           <div className="space-y-4">
             {faqData.map((faq, index) => (
               <div
-                key={faq.id}
+                key={faq.id || faq._id || index}
                 className="p-4 bg-white/5 rounded-xl space-y-3 border border-white/10"
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[#bd85f1] text-sm font-semibold">
                     FAQ #{index + 1}
                   </span>
-                  {/* <div className="flex items-center gap-2">
-                    {editingId === faq.id ? (
-                      <Button
-                        onClick={() => setEditingId(null)}
-                        size="small"
-                        startIcon={<FaSave />}
-                        sx={{
-                          color: "#4ade80",
-                          textTransform: "none",
-                          fontSize: "0.75rem",
-                          "&:hover": {
-                            backgroundColor: "rgba(74, 222, 128, 0.1)",
-                          },
-                        }}
-                      >
-                        Save
-                      </Button>
-                    ) : (
-                      <IconButton
-                        onClick={() => setEditingId(faq.id)}
-                        size="small"
-                        sx={{
-                          color: "#60a5fa",
-                          "&:hover": {
-                            backgroundColor: "rgba(96, 165, 250, 0.1)",
-                          },
-                        }}
-                      >
-                        <MdEdit />
-                      </IconButton>
-                    )}
-                    <IconButton
-                      onClick={() => handleDeleteClick(faq)}
-                      size="small"
-                      sx={{
-                        color: "#f87171",
-                        "&:hover": {
-                          backgroundColor: "rgba(248, 113, 113, 0.1)",
-                        },
-                      }}
-                    >
-                      <FaTrash />
-                    </IconButton>
-                  </div> */}
+                  <IconButton
+                    onClick={() => handleEditClick(faq)}
+                    size="small"
+                    sx={{
+                      color: "#60a5fa",
+                      "&:hover": {
+                        backgroundColor: "rgba(96, 165, 250, 0.1)",
+                      },
+                    }}
+                  >
+                    <MdEdit />
+                  </IconButton>
                 </div>
 
                 <div className="flex flex-col gap-3">
                   <TextField
                     fullWidth
-                    label={`Question ${index + 1}`}
+                    label={`Question`}
                     value={faq.question}
+                    disabled
                     sx={{
                       ...textFieldStyles,
                       "& .MuiOutlinedInput-root": {
@@ -209,8 +199,9 @@ export default function FAQ({ textFieldStyles }) {
                     fullWidth
                     multiline
                     rows={3}
-                    label={`Answer ${index + 1}`}
+                    label={`Answer`}
                     value={faq.answer}
+                    disabled
                     sx={{
                       ...textFieldStyles,
                       "& .MuiOutlinedInput-root": {
@@ -236,11 +227,14 @@ export default function FAQ({ textFieldStyles }) {
         )}
       </div>
 
-      {/* ================= Add FAQ Modal ================= */}
+      {/* ================= Add/Edit FAQ Modal ================= */}
       <Modal open={addModalOpen} onClose={() => setAddModalOpen(false)}>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-xl p-6 rounded-2xl bg-gradient-to-br from-[#6d1db9]/50 via-[#260950] to-[#190146] shadow-lg flex flex-col gap-4 text-white">
-          <p id="add-faq-modal-title" className="text-xl font-semibold">
-            Add FAQ
+          <p
+            id="add-faq-modal-title"
+            className="text-xl font-semibold capitalize"
+          >
+            {editingId ? "Edit" : "Add"} {category} FAQ
           </p>
 
           <TextField
@@ -266,15 +260,15 @@ export default function FAQ({ textFieldStyles }) {
               onClick={() => setAddModalOpen(false)}
               variant="outlined"
               sx={{
-                textTransform: "none", // same as Tailwind normal-case
-                color: "white", // text-white
-                borderColor: "rgba(255,255,255,0.2)", // border-white/20
-                borderRadius: "0.5rem", // rounded-lg
-                px: 2, // padding-left & right
-                py: 1, // padding-top & bottom
-                fontSize: "14px", // text-sm
+                textTransform: "none",
+                color: "white",
+                borderColor: "rgba(255,255,255,0.2)",
+                borderRadius: "0.5rem",
+                px: 2,
+                py: 1,
+                fontSize: "14px",
                 "&:hover": {
-                  backgroundColor: "rgba(255,255,255,0.1)", // hover:bg-white/10
+                  backgroundColor: "rgba(255,255,255,0.1)",
                 },
               }}
             >
@@ -287,11 +281,11 @@ export default function FAQ({ textFieldStyles }) {
                 color: "white",
                 px: 2,
               }}
-              onClick={handleSaveNewFaq}
+              onClick={handleSaveFaq}
               startIcon={<FaSave />}
               className="bg-gradient-to-r from-[#6d1db9] to-[#bd85f1] hover:from-[#5b189b] hover:to-[#a66fd9] text-white rounded-lg "
             >
-              Save FAQ
+              {editingId ? "Update FAQ" : "Save FAQ"}
             </Button>
           </div>
         </div>
