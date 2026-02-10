@@ -1,13 +1,10 @@
 import { useState } from "react";
-import { TextField, Button, Chip, Alert, Tabs, Tab } from "@mui/material";
-import { FaGlobe, FaInfo, FaSave } from "react-icons/fa";
-import { FaFile, FaShield } from "react-icons/fa6";
-import { FiHelpCircle, FiMail } from "react-icons/fi";
-import { toast } from "sonner";
+import { Chip, Alert, Tabs, Tab } from "@mui/material";
+import { FaInfo } from "react-icons/fa";
+import { FaFile } from "react-icons/fa6";
+import { FiHelpCircle } from "react-icons/fi";
 import { demoCmsContent } from "../../../../public/data/cmdData";
 import FAQ from "./ContentManagement/FAQ";
-import ContactInfo from "./ContentManagement/ContactInfo";
-import RefundPolicy from "./ContentManagement/RefundPolicy";
 import PrivacyPolicy from "./ContentManagement/PrivacyPolicy";
 import TermsAndConditions from "./ContentManagement/TermsAndConditions";
 
