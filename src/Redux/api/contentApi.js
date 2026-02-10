@@ -3,11 +3,11 @@ import { baseApi } from "../baseApi";
 const contentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getFaqData: builder.query({
-      query: () => {
+      query: (category) => {
+        console.log(category);
         const accessToken = sessionStorage.getItem("accessToken");
-        // console.log(accessToken);
         return {
-          url: "/faqs",
+          url: `/faqs?category=${category}`,
           method: "get",
           headers: {
             authorization: `Bearer ${accessToken}`,
@@ -19,12 +19,25 @@ const contentApi = baseApi.injectEndpoints({
     createFAQ: builder.mutation({
       query: (payload) => {
         const accessToken = sessionStorage.getItem("accessToken");
-        // console.log(accessToken);
-        // console.log("faq", payload);
         return {
           url: "/faqs",
           method: "post",
           body: payload,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        };
+      },
+      invalidatesTags: ["faq"],
+    }),
+    updateFAQ: builder.mutation({
+      query: ({ data, id }) => {
+        const accessToken = sessionStorage.getItem("accessToken");
+        console.log(id);
+        return {
+          url: `/faqs/${id}`,
+          method: "patch",
+          body: data,
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
@@ -128,6 +141,7 @@ const contentApi = baseApi.injectEndpoints({
 export const {
   useGetFaqDataQuery,
   useCreateFAQMutation,
+  useUpdateFAQMutation,
   useGetPrivacyPolicyQuery,
   useAddPrivacyPolicyMutation,
   useGetTermsAndConditionsQuery,
